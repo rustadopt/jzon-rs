@@ -7,6 +7,6 @@ authors = [
     ]
 documentation = "https://docs.rs/jzon/"
 repository = "https://github.com/rustadopt/jzon-rs"
-version = "0.12.4"
+version = "0.12.5"
 license = "MIT/Apache-2.0"
 edition = "2018"
