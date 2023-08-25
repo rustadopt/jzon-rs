@@ -1,7 +1,7 @@
-extern crate json;
+extern crate jzon;
 
 mod json_checker_fail {
-    use super::json::parse;
+    use super::jzon::parse;
 
     #[test]
     fn unclosed_array() {
@@ -160,7 +160,7 @@ mod json_checker_fail {
 }
 
 mod json_checker_pass {
-    use super::json::parse;
+    use super::jzon::parse;
 
     #[test]
     fn pass_1() {

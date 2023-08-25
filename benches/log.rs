@@ -7,7 +7,7 @@
 // for the Country enum
 // #![recursion_limit="259"]
 
-extern crate json;
+extern crate jzon;
 extern crate test;
 // extern crate serde;
 // extern crate serde_json;
@@ -233,7 +233,7 @@ fn json_rust_parse(b: &mut Bencher) {
     b.bytes = JSON_STR.len() as u64;
 
     b.iter(|| {
-        json::parse(JSON_STR).unwrap();
+        jzon::parse(JSON_STR).unwrap();
     });
 }
 
@@ -242,13 +242,13 @@ fn json_rust_parse_floats(b: &mut Bencher) {
     b.bytes = JSON_FLOAT_STR.len() as u64;
 
     b.iter(|| {
-        json::parse(JSON_FLOAT_STR).unwrap();
+        jzon::parse(JSON_FLOAT_STR).unwrap();
     });
 }
 
 #[bench]
 fn json_rust_stringify(b: &mut Bencher) {
-    let data = json::parse(JSON_STR).unwrap();
+    let data = jzon::parse(JSON_STR).unwrap();
 
     b.bytes = data.dump().len() as u64;
 
@@ -259,7 +259,7 @@ fn json_rust_stringify(b: &mut Bencher) {
 
 #[bench]
 fn json_rust_stringify_io_write(b: &mut Bencher) {
-    let data = json::parse(JSON_STR).unwrap();
+    let data = jzon::parse(JSON_STR).unwrap();
 
     b.bytes = data.dump().len() as u64;
 
@@ -272,7 +272,7 @@ fn json_rust_stringify_io_write(b: &mut Bencher) {
 
 #[bench]
 fn json_rust_stringify_floats(b: &mut Bencher) {
-    let data = json::parse(JSON_FLOAT_STR).unwrap();
+    let data = jzon::parse(JSON_FLOAT_STR).unwrap();
 
     b.bytes = data.dump().len() as u64;
 
@@ -283,7 +283,7 @@ fn json_rust_stringify_floats(b: &mut Bencher) {
 
 #[bench]
 fn json_rust_stringify_floats_io_write(b: &mut Bencher) {
-    let data = json::parse(JSON_FLOAT_STR).unwrap();
+    let data = jzon::parse(JSON_FLOAT_STR).unwrap();
 
     b.bytes = data.dump().len() as u64;
 

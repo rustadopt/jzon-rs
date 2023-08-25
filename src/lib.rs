@@ -19,9 +19,9 @@
 //! This crate intends to avoid that friction.
 //!
 //! ```rust
-//! # #[macro_use] extern crate json;
+//! # #[macro_use] extern crate jzon;
 //! # fn main() {
-//! let parsed = json::parse(r#"
+//! let parsed = jzon::parse(r#"
 //!
 //! {
 //!     "code": 200,
@@ -59,7 +59,7 @@
 //! Using macros and indexing, it's easy to work with the data.
 //!
 //! ```rust
-//! # #[macro_use] extern crate json;
+//! # #[macro_use] extern crate jzon;
 //! # fn main() {
 //! let mut data = object!{
 //!     foo: false,
@@ -98,59 +98,59 @@
 //! # }
 //! ```
 //!
-//! ## Serialize with `json::stringify(value)`
+//! ## Serialize with `jzon::stringify(value)`
 //!
 //! Primitives:
 //!
 //! ```
 //! // str slices
-//! assert_eq!(json::stringify("foobar"), "\"foobar\"");
+//! assert_eq!(jzon::stringify("foobar"), "\"foobar\"");
 //!
 //! // Owned strings
-//! assert_eq!(json::stringify("foobar".to_string()), "\"foobar\"");
+//! assert_eq!(jzon::stringify("foobar".to_string()), "\"foobar\"");
 //!
 //! // Any number types
-//! assert_eq!(json::stringify(42), "42");
+//! assert_eq!(jzon::stringify(42), "42");
 //!
 //! // Booleans
-//! assert_eq!(json::stringify(true), "true");
-//! assert_eq!(json::stringify(false), "false");
+//! assert_eq!(jzon::stringify(true), "true");
+//! assert_eq!(jzon::stringify(false), "false");
 //! ```
 //!
-//! Explicit `null` type `json::Null`:
+//! Explicit `null` type `jzon::Null`:
 //!
 //! ```
-//! assert_eq!(json::stringify(json::Null), "null");
+//! assert_eq!(jzon::stringify(jzon::Null), "null");
 //! ```
 //!
 //! Optional types:
 //!
 //! ```
 //! let value: Option<String> = Some("foo".to_string());
-//! assert_eq!(json::stringify(value), "\"foo\"");
+//! assert_eq!(jzon::stringify(value), "\"foo\"");
 //!
 //! let no_value: Option<String> = None;
-//! assert_eq!(json::stringify(no_value), "null");
+//! assert_eq!(jzon::stringify(no_value), "null");
 //! ```
 //!
 //! Vector:
 //!
 //! ```
 //! let data = vec![1,2,3];
-//! assert_eq!(json::stringify(data), "[1,2,3]");
+//! assert_eq!(jzon::stringify(data), "[1,2,3]");
 //! ```
 //!
 //! Vector with optional values:
 //!
 //! ```
 //! let data = vec![Some(1), None, Some(2), None, Some(3)];
-//! assert_eq!(json::stringify(data), "[1,null,2,null,3]");
+//! assert_eq!(jzon::stringify(data), "[1,null,2,null,3]");
 //! ```
 //!
 //! Pushing to arrays:
 //!
 //! ```
-//! let mut data = json::JsonValue::new_array();
+//! let mut data = jzon::JsonValue::new_array();
 //!
 //! data.push(10);
 //! data.push("foo");
@@ -162,7 +162,7 @@
 //! Putting fields on objects:
 //!
 //! ```
-//! let mut data = json::JsonValue::new_object();
+//! let mut data = jzon::JsonValue::new_object();
 //!
 //! data["answer"] = 42.into();
 //! data["foo"] = "bar".into();
@@ -173,7 +173,7 @@
 //! `array!` macro:
 //!
 //! ```
-//! # #[macro_use] extern crate json;
+//! # #[macro_use] extern crate jzon;
 //! # fn main() {
 //! let data = array!["foo", "bar", 100, true, null];
 //! assert_eq!(data.dump(), r#"["foo","bar",100,true,null]"#);
@@ -183,7 +183,7 @@
 //! `object!` macro:
 //!
 //! ```
-//! # #[macro_use] extern crate json;
+//! # #[macro_use] extern crate jzon;
 //! # fn main() {
 //! let data = object!{
 //!     name: "John Doe",
@@ -217,7 +217,7 @@ pub use value::JsonValue::Null;
 ///
 ///
 /// *Note:* Since 0.9.0 the old `JsonResult` type is deprecated. Always use
-/// `json::Result` instead.
+/// `jzon::Result` instead.
 pub type Result<T> = result::Result<T, Error>;
 
 pub mod iterators {
@@ -234,10 +234,10 @@ pub mod iterators {
     pub type EntriesMut<'a> = super::object::IterMut<'a>;
 }
 
-#[deprecated(since="0.9.0", note="use `json::Error` instead")]
+#[deprecated(since="0.9.0", note="use `jzon::Error` instead")]
 pub use Error as JsonError;
 
-#[deprecated(since="0.9.0", note="use `json::Result` instead")]
+#[deprecated(since="0.9.0", note="use `jzon::Result` instead")]
 pub use crate::Result as JsonResult;
 
 pub use parser::parse;
@@ -265,7 +265,7 @@ pub fn stringify_pretty<T>(root: T, spaces: u16) -> String where T: Into<JsonVal
 /// Helper macro for creating instances of `JsonValue::Array`.
 ///
 /// ```
-/// # #[macro_use] extern crate json;
+/// # #[macro_use] extern crate jzon;
 /// # fn main() {
 /// let data = array!["foo", 42, false];
 ///
@@ -344,7 +344,7 @@ macro_rules! value {
 /// Helper macro for creating instances of `JsonValue::Object`.
 ///
 /// ```
-/// # #[macro_use] extern crate json;
+/// # #[macro_use] extern crate jzon;
 /// # fn main() {
 /// let data = object!{
 ///     foo: 42,

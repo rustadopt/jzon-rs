@@ -1,9 +1,9 @@
 #[macro_use]
-extern crate json;
+extern crate jzon;
 
 use std::collections::{ HashMap, BTreeMap };
 use std::f64;
-use json::{ parse, stringify, stringify_pretty, JsonValue, Null };
+use jzon::{ parse, stringify, stringify_pretty, JsonValue, Null };
 
 #[test]
 fn stringify_null() {
@@ -150,7 +150,7 @@ fn stringify_object() {
 
 #[test]
 fn stringify_raw_object() {
-    let mut object = json::object::Object::new();
+    let mut object = jzon::object::Object::new();
 
     object.insert("name", "Maciej".into());
     object.insert("age", 30.into());

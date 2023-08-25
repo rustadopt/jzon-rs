@@ -68,8 +68,8 @@ impl Eq for JsonValue {}
 /// Implements formatting
 ///
 /// ```
-/// # use json;
-/// let data = json::parse(r#"{"url":"https://github.com/"}"#).unwrap();
+/// # use jzon;
+/// let data = jzon::parse(r#"{"url":"https://github.com/"}"#).unwrap();
 /// println!("{}", data);
 /// println!("{:#}", data);
 /// ```
@@ -285,7 +285,7 @@ impl JsonValue {
     /// or if the number is negative or a NaN.
     ///
     /// ```
-    /// # use json::JsonValue;
+    /// # use jzon::JsonValue;
     /// let price_a = JsonValue::from(5.99);
     /// let price_b = JsonValue::from(7);
     /// let price_c = JsonValue::from(10.2);
@@ -305,7 +305,7 @@ impl JsonValue {
     /// `i64`, properly handling negative numbers.
     ///
     /// ```
-    /// # use json::JsonValue;
+    /// # use jzon::JsonValue;
     /// let balance_a = JsonValue::from(-1.49);
     /// let balance_b = JsonValue::from(42);
     ///
@@ -324,7 +324,7 @@ impl JsonValue {
     /// ## Example
     ///
     /// ```
-    /// # #[macro_use] extern crate json;
+    /// # #[macro_use] extern crate jzon;
     /// # fn main() {
     /// let mut data = array!["Foo", 42];
     ///
@@ -354,7 +354,7 @@ impl JsonValue {
     /// ## Example
     ///
     /// ```
-    /// # #[macro_use] extern crate json;
+    /// # #[macro_use] extern crate jzon;
     /// # fn main() {
     /// let mut data = array!["Hello", "World"];
     ///
@@ -437,8 +437,8 @@ impl JsonValue {
     /// Will return an empty iterator if called on non-array types.
     /// ## Example
     /// ```
-    /// # use json::JsonValue;
-    /// # #[macro_use] use json::array;
+    /// # use jzon::JsonValue;
+    /// # #[macro_use] use jzon::array;
     /// let animals = array!["Cat", "Dog", "Snail"];
     /// let mut animals_with_letter_a = Vec::new();
     /// for animal in animals.members() {
@@ -472,8 +472,8 @@ impl JsonValue {
     /// Will return an empty iterator if called on non-object types.
     /// ## Example
     /// ```
-    /// # use json::JsonValue;
-    /// let heights = json::parse(r#"
+    /// # use jzon::JsonValue;
+    /// let heights = jzon::parse(r#"
     /// {
     ///     "Alice": 1.42,
     ///     "Bob": 1.6,
@@ -572,7 +572,7 @@ impl JsonValue {
 /// ## Example
 ///
 /// ```
-/// # use json::JsonValue;
+/// # use jzon::JsonValue;
 /// let mut array = JsonValue::new_array();
 ///
 /// array.push("foo");
@@ -596,7 +596,7 @@ impl Index<usize> for JsonValue {
 ///
 /// ```
 /// # #[macro_use]
-/// # extern crate json;
+/// # extern crate jzon;
 /// #
 /// # fn main() {
 /// let mut array = array!["foo", 3.14];
@@ -634,7 +634,7 @@ impl IndexMut<usize> for JsonValue {
 ///
 /// ```
 /// # #[macro_use]
-/// # extern crate json;
+/// # extern crate jzon;
 /// #
 /// # fn main() {
 /// let object = object!{
@@ -677,7 +677,7 @@ impl<'a> Index<&'a String> for JsonValue {
 ///
 /// ```
 /// # #[macro_use]
-/// # extern crate json;
+/// # extern crate jzon;
 /// #
 /// # fn main() {
 /// let mut object = object!{};

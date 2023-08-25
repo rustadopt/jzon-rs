@@ -1,6 +1,6 @@
-extern crate json;
+extern crate jzon;
 
-use json::number::Number;
+use jzon::number::Number;
 use std::f64;
 
 #[test]

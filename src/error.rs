@@ -4,7 +4,7 @@ use std::{ char, error, fmt };
 ///
 ///
 /// *Note:* Since `0.9.0` using `JsonError` is deprecated. Always use
-/// `json::Error` instead!
+/// `jzon::Error` instead!
 #[derive(Debug, PartialEq, Eq)]
 pub enum Error {
     UnexpectedCharacter {

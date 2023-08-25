@@ -1,7 +1,7 @@
 #[macro_use]
-extern crate json;
+extern crate jzon;
 
-use json::{ parse, JsonValue, JsonError, Null };
+use jzon::{ parse, JsonValue, JsonError, Null };
 
 #[test]
 fn is_as_string() {
@@ -114,15 +114,15 @@ fn is_null() {
 #[test]
 fn is_empty() {
     assert!(Null.is_empty());
-    assert!(json::from(0).is_empty());
-    assert!(json::from("").is_empty());
-    assert!(json::from(false).is_empty());
+    assert!(jzon::from(0).is_empty());
+    assert!(jzon::from("").is_empty());
+    assert!(jzon::from(false).is_empty());
     assert!(array![].is_empty());
     assert!(object!{}.is_empty());
 
-    assert!(!json::from(1).is_empty());
-    assert!(!json::from("foo").is_empty());
-    assert!(!json::from(true).is_empty());
+    assert!(!jzon::from(1).is_empty());
+    assert!(!jzon::from("foo").is_empty());
+    assert!(!jzon::from(true).is_empty());
     assert!(!array![0].is_empty());
     assert!(!object!{ foo: false }.is_empty());
 }
@@ -366,7 +366,7 @@ fn object_dump_pretty() {
 
 #[test]
 fn null_len() {
-    let data = json::Null;
+    let data = jzon::Null;
 
     assert_eq!(data.len(), 0);
 }
@@ -645,7 +645,7 @@ fn equality() {
     };
 
     let left_short = object!{
-        foo: [JsonValue::Short(unsafe { json::short::Short::from_slice("bar") }), 100, true]
+        foo: [JsonValue::Short(unsafe { jzon::short::Short::from_slice("bar") }), 100, true]
     };
 
     let change_bool = object!{
@@ -657,7 +657,7 @@ fn equality() {
     };
 
     let change_short = object!{
-        foo: [JsonValue::Short(unsafe { json::short::Short::from_slice("sna") }), 100, true]
+        foo: [JsonValue::Short(unsafe { jzon::short::Short::from_slice("sna") }), 100, true]
     };
 
     assert_eq!(left, left_copy);

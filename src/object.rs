@@ -649,8 +649,8 @@ impl<'a> ExactSizeIterator for IterMut<'a> {
 ///
 /// ```
 /// # #[macro_use]
-/// # extern crate json;
-/// # use json::JsonValue;
+/// # extern crate jzon;
+/// # use jzon::JsonValue;
 /// #
 /// # fn main() {
 /// let value = object!{
@@ -696,8 +696,8 @@ impl<'a> Index<&'a String> for Object {
 ///
 /// ```
 /// # #[macro_use]
-/// # extern crate json;
-/// # use json::JsonValue;
+/// # extern crate jzon;
+/// # use jzon::JsonValue;
 /// #
 /// # fn main() {
 /// let value = object!{};

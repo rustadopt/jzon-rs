@@ -1,9 +1,9 @@
 #[macro_use]
-extern crate json;
+extern crate jzon;
 
-use json::codegen::Generator;
-use json::object::Object;
-use json::JsonValue;
+use jzon::codegen::Generator;
+use jzon::object::Object;
+use jzon::JsonValue;
 use std::io;
 
 /// Custom generator that sort keys by name; based on DumpGenerator.

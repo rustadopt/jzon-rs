@@ -1,8 +1,8 @@
 #[macro_use]
-extern crate json;
+extern crate jzon;
 
-use json::number::Number;
-use json::{ parse, JsonValue, Null };
+use jzon::number::Number;
+use jzon::{ parse, JsonValue, Null };
 
 #[test]
 fn parse_true() {
@@ -349,7 +349,7 @@ fn parse_error_after_depth_limit() {
         text.push_str("}]");
     }
 
-    assert_eq!(parse(&text), Err(json::Error::ExceededDepthLimit));
+    assert_eq!(parse(&text), Err(jzon::Error::ExceededDepthLimit));
 }
 
 #[test]
@@ -376,5 +376,5 @@ fn does_not_panic_on_huge_numbers() {
         string.push('0');
     }
 
-    let _ = json::parse(&string);
+    let _ = jzon::parse(&string);
 }

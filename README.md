@@ -1,13 +1,14 @@
-![](https://raw.githubusercontent.com/maciejhirsz/json-rust/master/json-rust-logo-small.png)
+# jzon-rs
 
-# json-rust
+![](https://raw.githubusercontent.com/gierens/jzon-rs/master/json-rust-logo-small.png)
 
-Parse and serialize [JSON](http://json.org/) with ease.
+Continuation of [json-rust](https://github.com/maciejhirsz/json-rust),
+a rust library to parse and serialize [JSON](http://json.org/) with ease.
 
-**[Changelog](https://github.com/maciejhirsz/json-rust/releases) -**
-**[Complete Documentation](https://docs.rs/json/) -**
-**[Cargo](https://crates.io/crates/json) -**
-**[Repository](https://github.com/maciejhirsz/json-rust)**
+**[Changelog](https://github.com/gierens/jzon-rs/releases) -**
+**[Complete Documentation](https://docs.rs/jzon/) -**
+**[Cargo](https://crates.io/crates/jzon) -**
+**[Repository](https://github.com/gierens/jzon-rs)**
 
 ## Why?
 
@@ -19,7 +20,7 @@ introduces friction.
 This crate intends to avoid that friction.
 
 ```rust
-let parsed = json::parse(r#"
+let parsed = jzon::parse(r#"
 
 {
     "code": 200,
@@ -98,14 +99,14 @@ Just add it to your `Cargo.toml` file:
 
 ```toml
 [dependencies]
-json = "*"
+jzon = "*"
 ```
 
 Then import it in your `main.rs` / `lib.rs` file:
 
 ```rust
 #[macro_use]
-extern crate json;
+extern crate jzon;
 ```
 
 ## Performance and Conformance
