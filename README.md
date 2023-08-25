@@ -2,15 +2,15 @@
 
 # jzon-rs
 
-![](https://raw.githubusercontent.com/gierens/jzon-rs/master/json-rust-logo-tiny.png)
+![](https://raw.githubusercontent.com/rustadopt/jzon-rs/master/json-rust-logo-tiny.png)
 
-Continuation of [json-rust](https://github.com/maciejhirsz/json-rust),
+Adoption and continuation of [maciejhirsz/json-rust](https://github.com/maciejhirsz/json-rust),
 a rust library to parse and serialize [JSON](http://json.org/) with ease.
 
-**[Changelog](https://github.com/gierens/jzon-rs/releases) -**
+**[Changelog](https://github.com/rustadopt/jzon-rs/releases) -**
 **[Complete Documentation](https://docs.rs/jzon/) -**
 **[Cargo](https://crates.io/crates/jzon) -**
-**[Repository](https://github.com/gierens/jzon-rs)**
+**[Repository](https://github.com/rustadopt/jzon-rs)**
 
 </div>
 

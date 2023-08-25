@@ -6,7 +6,7 @@ authors = [
     "Maciej Hirsz <hello@maciej.codes>"
     ]
 documentation = "https://docs.rs/jzon/"
-repository = "https://github.com/gierens/jzon-rs"
+repository = "https://github.com/rustadopt/jzon-rs"
 version = "0.12.4"
 license = "MIT/Apache-2.0"
 edition = "2018"
