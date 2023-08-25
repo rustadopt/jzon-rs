@@ -4,8 +4,10 @@
 
 ![](https://raw.githubusercontent.com/rustadopt/jzon-rs/master/json-rust-logo-tiny.png)
 
-Adoption and continuation of [maciejhirsz/json-rust](https://github.com/maciejhirsz/json-rust),
-a rust library to parse and serialize [JSON](http://json.org/) with ease.
+Adoption and continuation of [maciejhirsz/json-rust](https://github.com/maciejhirsz/json-rust).
+Big shout-out to its creator [Maciej Hirsz](https://github.com/maciejhirsz).
+
+Rust library to parse and serialize [JSON](http://json.org/) with ease.
 
 **[Changelog](https://github.com/rustadopt/jzon-rs/releases) -**
 **[Complete Documentation](https://docs.rs/jzon/) -**
