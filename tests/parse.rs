@@ -238,7 +238,7 @@ fn parse_and_index_mut_from_null() {
 
     assert!(data["foo"]["bar"].is_null());
 
-    // test that data didn't coerece to object
+    // test that data didn't coerce to object
     assert!(data.is_null());
 
     data["foo"]["bar"] = 100.into();

@@ -154,7 +154,7 @@ mod json_checker_fail {
     }
 
     #[test]
-    fn missmatch() {
+    fn mismatch() {
         assert!(parse(r#"["mismatch"}"#).is_err());
     }
 }
