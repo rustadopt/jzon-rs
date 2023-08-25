@@ -1,6 +1,8 @@
+<div align="center">
+
 # jzon-rs
 
-![](https://raw.githubusercontent.com/gierens/jzon-rs/master/json-rust-logo-small.png)
+![](https://raw.githubusercontent.com/gierens/jzon-rs/master/json-rust-logo-tiny.png)
 
 Continuation of [json-rust](https://github.com/maciejhirsz/json-rust),
 a rust library to parse and serialize [JSON](http://json.org/) with ease.
@@ -9,6 +11,8 @@ a rust library to parse and serialize [JSON](http://json.org/) with ease.
 **[Complete Documentation](https://docs.rs/jzon/) -**
 **[Cargo](https://crates.io/crates/jzon) -**
 **[Repository](https://github.com/gierens/jzon-rs)**
+
+</div>
 
 ## Why?
 
