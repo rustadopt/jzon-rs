@@ -1,6 +1,6 @@
 use std::mem::MaybeUninit;
-use std::{ ptr, str, slice, fmt };
 use std::ops::Deref;
+use std::{fmt, ptr, slice, str};
 
 pub const MAX_LEN: usize = 30;
 
@@ -37,9 +37,10 @@ impl Short {
     #[inline]
     pub fn as_str(&self) -> &str {
         unsafe {
-            str::from_utf8_unchecked(
-                slice::from_raw_parts(self.value.as_ptr() as _, self.len as usize)
-            )
+            str::from_utf8_unchecked(slice::from_raw_parts(
+                self.value.as_ptr() as _,
+                self.len as usize,
+            ))
         }
     }
 }

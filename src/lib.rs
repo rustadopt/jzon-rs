@@ -200,14 +200,14 @@
 use std::result;
 
 pub mod codegen;
-mod parser;
-mod value;
 mod error;
+mod parser;
 mod util;
+mod value;
 
-pub mod short;
-pub mod object;
 pub mod number;
+pub mod object;
+pub mod short;
 
 pub use error::Error;
 pub use value::JsonValue;
@@ -234,10 +234,10 @@ pub mod iterators {
     pub type EntriesMut<'a> = super::object::IterMut<'a>;
 }
 
-#[deprecated(since="0.9.0", note="use `jzon::Error` instead")]
+#[deprecated(since = "0.9.0", note = "use `jzon::Error` instead")]
 pub use Error as JsonError;
 
-#[deprecated(since="0.9.0", note="use `jzon::Result` instead")]
+#[deprecated(since = "0.9.0", note = "use `jzon::Result` instead")]
 pub use crate::Result as JsonResult;
 
 pub use parser::parse;
@@ -245,19 +245,28 @@ pub use parser::parse;
 pub type Array = Vec<JsonValue>;
 
 /// Convenience for `JsonValue::from(value)`
-pub fn from<T>(value: T) -> JsonValue where T: Into<JsonValue> {
+pub fn from<T>(value: T) -> JsonValue
+where
+    T: Into<JsonValue>,
+{
     value.into()
 }
 
 /// Pretty prints out the value as JSON string.
-pub fn stringify<T>(root: T) -> String where T: Into<JsonValue> {
+pub fn stringify<T>(root: T) -> String
+where
+    T: Into<JsonValue>,
+{
     let root: JsonValue = root.into();
     root.dump()
 }
 
 /// Pretty prints out the value as JSON string. Second argument is a
 /// number of spaces to indent new blocks with.
-pub fn stringify_pretty<T>(root: T, spaces: u16) -> String where T: Into<JsonValue> {
+pub fn stringify_pretty<T>(root: T, spaces: u16) -> String
+where
+    T: Into<JsonValue>,
+{
     let root: JsonValue = root.into();
     root.pretty(spaces)
 }

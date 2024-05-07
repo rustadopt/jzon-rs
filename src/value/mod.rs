@@ -1,14 +1,16 @@
-use std::ops::{Index, IndexMut, Deref};
 use std::convert::TryInto;
-use std::{fmt, mem, usize, u8, u16, u32, u64, isize, i8, i16, i32, i64, f32};
 use std::io::{self, Write};
+use std::ops::{Deref, Index, IndexMut};
+use std::{f32, fmt, i16, i32, i64, i8, isize, mem, u16, u32, u64, u8, usize};
 
-use crate::{Result, Error};
-use crate::short::Short;
+use crate::codegen::{
+    DumpGenerator, Generator, PrettyGenerator, PrettyWriterGenerator, WriterGenerator,
+};
+use crate::iterators::{Entries, EntriesMut, Members, MembersMut};
 use crate::number::Number;
 use crate::object::Object;
-use crate::iterators::{ Members, MembersMut, Entries, EntriesMut };
-use crate::codegen::{ Generator, PrettyGenerator, DumpGenerator, WriterGenerator, PrettyWriterGenerator };
+use crate::short::Short;
+use crate::{Error, Result};
 
 mod implements;
 
@@ -21,7 +23,7 @@ macro_rules! number_to_unsigned {
         } else {
             Some($value as $unsigned)
         }
-    }
+    };
 }
 
 macro_rules! number_to_signed {
@@ -31,7 +33,7 @@ macro_rules! number_to_signed {
         } else {
             Some($value as $signed)
         }
-    }
+    };
 }
 
 #[derive(Debug, Clone)]
@@ -52,8 +54,9 @@ impl PartialEq for JsonValue {
             (&Null, &Null) => true,
             (&Short(ref a), &Short(ref b)) => a == b,
             (&String(ref a), &String(ref b)) => a == b,
-            (&Short(ref a), &String(ref b))
-            | (&String(ref b), &Short(ref a)) => a.as_str() == b.as_str(),
+            (&Short(ref a), &String(ref b)) | (&String(ref b), &Short(ref a)) => {
+                a.as_str() == b.as_str()
+            }
             (&Number(ref a), &Number(ref b)) => a == b,
             (&Boolean(ref a), &Boolean(ref b)) => a == b,
             (&Object(ref a), &Object(ref b)) => a == b,
@@ -79,17 +82,16 @@ impl fmt::Display for JsonValue {
             f.write_str(&self.pretty(4))
         } else {
             match *self {
-                JsonValue::Short(ref value)   => value.fmt(f),
-                JsonValue::String(ref value)  => value.fmt(f),
-                JsonValue::Number(ref value)  => value.fmt(f),
+                JsonValue::Short(ref value) => value.fmt(f),
+                JsonValue::String(ref value) => value.fmt(f),
+                JsonValue::Number(ref value) => value.fmt(f),
                 JsonValue::Boolean(ref value) => value.fmt(f),
-                JsonValue::Null               => f.write_str("null"),
-                _                             => f.write_str(&self.dump())
+                JsonValue::Null => f.write_str("null"),
+                _ => f.write_str(&self.dump()),
             }
         }
     }
 }
-
 
 static NULL: JsonValue = JsonValue::Null;
 
@@ -124,7 +126,7 @@ impl JsonValue {
     /// Writes the JSON as byte stream into an implementor of `std::io::Write`.
     ///
     /// This method is deprecated as it will panic on io errors, use `write` instead.
-    #[deprecated(since="0.10.2", note="use `JsonValue::write` instead")]
+    #[deprecated(since = "0.10.2", note = "use `JsonValue::write` instead")]
     pub fn to_writer<W: Write>(&self, writer: &mut W) {
         let mut gen = WriterGenerator::new(writer);
         gen.write_json(self).expect("Deprecated");
@@ -144,44 +146,44 @@ impl JsonValue {
 
     pub fn is_string(&self) -> bool {
         match *self {
-            JsonValue::Short(_)  => true,
+            JsonValue::Short(_) => true,
             JsonValue::String(_) => true,
-            _                    => false,
+            _ => false,
         }
     }
 
     pub fn is_number(&self) -> bool {
         match *self {
             JsonValue::Number(_) => true,
-            _                    => false,
+            _ => false,
         }
     }
 
     pub fn is_boolean(&self) -> bool {
         match *self {
             JsonValue::Boolean(_) => true,
-            _                     => false
+            _ => false,
         }
     }
 
     pub fn is_null(&self) -> bool {
         match *self {
             JsonValue::Null => true,
-            _               => false,
+            _ => false,
         }
     }
 
     pub fn is_object(&self) -> bool {
         match *self {
             JsonValue::Object(_) => true,
-            _                    => false,
+            _ => false,
         }
     }
 
     pub fn is_array(&self) -> bool {
         match *self {
             JsonValue::Array(_) => true,
-            _                   => false,
+            _ => false,
         }
     }
 
@@ -195,28 +197,28 @@ impl JsonValue {
     /// - empty object (`object!{}`)
     pub fn is_empty(&self) -> bool {
         match *self {
-            JsonValue::Null               => true,
-            JsonValue::Short(ref value)   => value.is_empty(),
-            JsonValue::String(ref value)  => value.is_empty(),
-            JsonValue::Number(ref value)  => value.is_empty(),
+            JsonValue::Null => true,
+            JsonValue::Short(ref value) => value.is_empty(),
+            JsonValue::String(ref value) => value.is_empty(),
+            JsonValue::Number(ref value) => value.is_empty(),
             JsonValue::Boolean(ref value) => !value,
-            JsonValue::Array(ref value)   => value.is_empty(),
-            JsonValue::Object(ref value)  => value.is_empty(),
+            JsonValue::Array(ref value) => value.is_empty(),
+            JsonValue::Object(ref value) => value.is_empty(),
         }
     }
 
     pub fn as_str(&self) -> Option<&str> {
         match *self {
-            JsonValue::Short(ref value)  => Some(value),
+            JsonValue::Short(ref value) => Some(value),
             JsonValue::String(ref value) => Some(value),
-            _                            => None
+            _ => None,
         }
     }
 
     pub fn as_number(&self) -> Option<Number> {
         match *self {
             JsonValue::Number(value) => Some(value),
-            _                        => None
+            _ => None,
         }
     }
 
@@ -229,25 +231,27 @@ impl JsonValue {
     }
 
     pub fn as_u64(&self) -> Option<u64> {
-        self.as_number().and_then(|value| {
-            value.try_into().ok()
-        })
+        self.as_number().and_then(|value| value.try_into().ok())
     }
 
     pub fn as_u32(&self) -> Option<u32> {
-        self.as_u64().and_then(|value| number_to_unsigned!(u32, value, u64))
+        self.as_u64()
+            .and_then(|value| number_to_unsigned!(u32, value, u64))
     }
 
     pub fn as_u16(&self) -> Option<u16> {
-        self.as_u64().and_then(|value| number_to_unsigned!(u16, value, u64))
+        self.as_u64()
+            .and_then(|value| number_to_unsigned!(u16, value, u64))
     }
 
     pub fn as_u8(&self) -> Option<u8> {
-        self.as_u64().and_then(|value| number_to_unsigned!(u8, value, u64))
+        self.as_u64()
+            .and_then(|value| number_to_unsigned!(u8, value, u64))
     }
 
     pub fn as_usize(&self) -> Option<usize> {
-        self.as_u64().and_then(|value| number_to_unsigned!(usize, value, u64))
+        self.as_u64()
+            .and_then(|value| number_to_unsigned!(usize, value, u64))
     }
 
     pub fn as_i64(&self) -> Option<i64> {
@@ -255,25 +259,29 @@ impl JsonValue {
     }
 
     pub fn as_i32(&self) -> Option<i32> {
-        self.as_i64().and_then(|value| number_to_signed!(i32, value, i64))
+        self.as_i64()
+            .and_then(|value| number_to_signed!(i32, value, i64))
     }
 
     pub fn as_i16(&self) -> Option<i16> {
-        self.as_i64().and_then(|value| number_to_signed!(i16, value, i64))
+        self.as_i64()
+            .and_then(|value| number_to_signed!(i16, value, i64))
     }
 
     pub fn as_i8(&self) -> Option<i8> {
-        self.as_i64().and_then(|value| number_to_signed!(i8, value, i64))
+        self.as_i64()
+            .and_then(|value| number_to_signed!(i8, value, i64))
     }
 
     pub fn as_isize(&self) -> Option<isize> {
-        self.as_i64().and_then(|value| number_to_signed!(isize, value, i64))
+        self.as_i64()
+            .and_then(|value| number_to_signed!(isize, value, i64))
     }
 
     pub fn as_bool(&self) -> Option<bool> {
         match *self {
             JsonValue::Boolean(ref value) => Some(*value),
-            _                             => None
+            _ => None,
         }
     }
 
@@ -351,7 +359,7 @@ impl JsonValue {
     pub fn as_fixed_point_u64(&self, point: u16) -> Option<u64> {
         match *self {
             JsonValue::Number(ref value) => value.as_fixed_point_u64(point),
-            _                            => None
+            _ => None,
         }
     }
 
@@ -369,7 +377,7 @@ impl JsonValue {
     pub fn as_fixed_point_i64(&self, point: u16) -> Option<i64> {
         match *self {
             JsonValue::Number(ref value) => value.as_fixed_point_i64(point),
-            _                            => None
+            _ => None,
         }
     }
 
@@ -424,11 +432,11 @@ impl JsonValue {
         mem::swap(self, &mut placeholder);
 
         match placeholder {
-            JsonValue::Short(short)   => return Some(short.into()),
+            JsonValue::Short(short) => return Some(short.into()),
             JsonValue::String(string) => return Some(string),
 
             // Not a string? Swap the original value back in place!
-            _ => mem::swap(self, &mut placeholder)
+            _ => mem::swap(self, &mut placeholder),
         }
 
         None
@@ -436,13 +444,15 @@ impl JsonValue {
 
     /// Works on `JsonValue::Array` - pushes a new value to the array.
     pub fn push<T>(&mut self, value: T) -> Result<()>
-    where T: Into<JsonValue> {
+    where
+        T: Into<JsonValue>,
+    {
         match *self {
             JsonValue::Array(ref mut vec) => {
                 vec.push(value.into());
                 Ok(())
-            },
-            _ => Err(Error::wrong_type("Array"))
+            }
+            _ => Err(Error::wrong_type("Array")),
         }
     }
 
@@ -450,18 +460,19 @@ impl JsonValue {
     /// an array. On failure returns a null.
     pub fn pop(&mut self) -> JsonValue {
         match *self {
-            JsonValue::Array(ref mut vec) => {
-                vec.pop().unwrap_or(JsonValue::Null)
-            },
-            _ => JsonValue::Null
+            JsonValue::Array(ref mut vec) => vec.pop().unwrap_or(JsonValue::Null),
+            _ => JsonValue::Null,
         }
     }
 
     /// Works on `JsonValue::Array` - checks if the array contains a value
-    pub fn contains<T>(&self, item: T) -> bool where T: PartialEq<JsonValue> {
+    pub fn contains<T>(&self, item: T) -> bool
+    where
+        T: PartialEq<JsonValue>,
+    {
         match *self {
             JsonValue::Array(ref vec) => vec.iter().any(|member| item == *member),
-            _                         => false
+            _ => false,
         }
     }
 
@@ -469,7 +480,7 @@ impl JsonValue {
     pub fn has_key(&self, key: &str) -> bool {
         match *self {
             JsonValue::Object(ref object) => object.get(key).is_some(),
-            _                             => false
+            _ => false,
         }
     }
 
@@ -477,13 +488,9 @@ impl JsonValue {
     /// other types.
     pub fn len(&self) -> usize {
         match *self {
-            JsonValue::Array(ref vec) => {
-                vec.len()
-            },
-            JsonValue::Object(ref object) => {
-                object.len()
-            },
-            _ => 0
+            JsonValue::Array(ref vec) => vec.len(),
+            JsonValue::Object(ref object) => object.len(),
+            _ => 0,
         }
     }
 
@@ -504,10 +511,8 @@ impl JsonValue {
     /// ```
     pub fn members(&self) -> Members {
         match *self {
-            JsonValue::Array(ref vec) => {
-                vec.iter()
-            },
-            _ => [].iter()
+            JsonValue::Array(ref vec) => vec.iter(),
+            _ => [].iter(),
         }
     }
 
@@ -515,10 +520,8 @@ impl JsonValue {
     /// Will return an empty iterator if called on non-array types.
     pub fn members_mut(&mut self) -> MembersMut {
         match *self {
-            JsonValue::Array(ref mut vec) => {
-                vec.iter_mut()
-            },
-            _ => [].iter_mut()
+            JsonValue::Array(ref mut vec) => vec.iter_mut(),
+            _ => [].iter_mut(),
         }
     }
 
@@ -547,10 +550,8 @@ impl JsonValue {
     /// ```
     pub fn entries(&self) -> Entries {
         match *self {
-            JsonValue::Object(ref object) => {
-                object.iter()
-            },
-            _ => Entries::empty()
+            JsonValue::Object(ref object) => object.iter(),
+            _ => Entries::empty(),
         }
     }
 
@@ -559,10 +560,8 @@ impl JsonValue {
     /// Will return an empty iterator if called on non-object types.
     pub fn entries_mut(&mut self) -> EntriesMut {
         match *self {
-            JsonValue::Object(ref mut object) => {
-                object.iter_mut()
-            },
-            _ => EntriesMut::empty()
+            JsonValue::Object(ref mut object) => object.iter_mut(),
+            _ => EntriesMut::empty(),
         }
     }
 
@@ -571,13 +570,15 @@ impl JsonValue {
     /// `String`. The internals of `Object` will handle the heap allocation of the key
     /// if needed for better performance.
     pub fn insert<T>(&mut self, key: &str, value: T) -> Result<()>
-    where T: Into<JsonValue> {
+    where
+        T: Into<JsonValue>,
+    {
         match *self {
             JsonValue::Object(ref mut object) => {
                 object.insert(key, value.into());
                 Ok(())
-            },
-            _ => Err(Error::wrong_type("Object"))
+            }
+            _ => Err(Error::wrong_type("Object")),
         }
     }
 
@@ -586,10 +587,8 @@ impl JsonValue {
     /// object, it will return a null.
     pub fn remove(&mut self, key: &str) -> JsonValue {
         match *self {
-            JsonValue::Object(ref mut object) => {
-                object.remove(key).unwrap_or(JsonValue::Null)
-            },
-            _ => JsonValue::Null
+            JsonValue::Object(ref mut object) => object.remove(key).unwrap_or(JsonValue::Null),
+            _ => JsonValue::Null,
         }
     }
 
@@ -604,33 +603,35 @@ impl JsonValue {
                 } else {
                     JsonValue::Null
                 }
-            },
-            _ => JsonValue::Null
+            }
+            _ => JsonValue::Null,
         }
     }
 
     /// Works on `JsonValue::Array` - insert an entry at given index.
     /// If the method is called on anything but an aray or if the index is out
     /// of bounds, it will return an error.
-    pub fn array_insert<T>(&mut self, index: usize, value: T) -> Result<()> 
-        where T: Into<JsonValue> {
+    pub fn array_insert<T>(&mut self, index: usize, value: T) -> Result<()>
+    where
+        T: Into<JsonValue>,
+    {
         match *self {
             JsonValue::Array(ref mut vec) => {
                 vec.insert(index, value.into());
                 Ok(())
-            },
-            _ => Err(Error::wrong_type("Array"))
+            }
+            _ => Err(Error::wrong_type("Array")),
         }
-    }        
-    
+    }
+
     /// When called on an array or an object, will wipe them clean. When called
     /// on a string will clear the string. Numbers and booleans become null.
     pub fn clear(&mut self) {
         match *self {
             JsonValue::String(ref mut string) => string.clear(),
             JsonValue::Object(ref mut object) => object.clear(),
-            JsonValue::Array(ref mut vec)     => vec.clear(),
-            _                                 => *self = JsonValue::Null,
+            JsonValue::Array(ref mut vec) => vec.clear(),
+            _ => *self = JsonValue::Null,
         }
     }
 }
@@ -653,7 +654,7 @@ impl Index<usize> for JsonValue {
     fn index(&self, index: usize) -> &JsonValue {
         match *self {
             JsonValue::Array(ref vec) => vec.get(index).unwrap_or(&NULL),
-            _ => &NULL
+            _ => &NULL,
         }
     }
 }
@@ -718,7 +719,7 @@ impl<'a> Index<&'a str> for JsonValue {
     fn index(&self, index: &str) -> &JsonValue {
         match *self {
             JsonValue::Object(ref object) => &object[index],
-            _ => &NULL
+            _ => &NULL,
         }
     }
 }
@@ -758,9 +759,7 @@ impl<'a> Index<&'a String> for JsonValue {
 impl<'a> IndexMut<&'a str> for JsonValue {
     fn index_mut(&mut self, index: &str) -> &mut JsonValue {
         match *self {
-            JsonValue::Object(ref mut object) => {
-                &mut object[index]
-            },
+            JsonValue::Object(ref mut object) => &mut object[index],
             _ => {
                 *self = JsonValue::new_object();
                 self.index_mut(index)

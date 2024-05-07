@@ -8,8 +8,7 @@
 
 use std::{io, mem, ptr, slice};
 
-const DEC_DIGITS_LUT: &'static[u8] =
-    b"0001020304050607080910111213141516171819\
+const DEC_DIGITS_LUT: &'static [u8] = b"0001020304050607080910111213141516171819\
       2021222324252627282930313233343536373839\
       4041424344454647484950515253545556575859\
       6061626364656667686970717273747576777879\
@@ -50,7 +49,12 @@ unsafe fn write_num(n: &mut u64, curr: &mut isize, buf_ptr: *mut u8, lut_ptr: *c
     }
 }
 
-pub unsafe fn write<W: io::Write>(wr: &mut W, positive: bool, mut n: u64, exponent: i16) -> io::Result<()> {
+pub unsafe fn write<W: io::Write>(
+    wr: &mut W,
+    positive: bool,
+    mut n: u64,
+    exponent: i16,
+) -> io::Result<()> {
     if !positive {
         wr.write_all(b"-")?;
     }
@@ -68,19 +72,17 @@ pub unsafe fn write<W: io::Write>(wr: &mut W, positive: bool, mut n: u64, expone
     if exponent == 0 {
         write_num(&mut n, &mut curr, buf_ptr, lut_ptr);
 
-        return wr.write_all(
-            slice::from_raw_parts(
-                buf_ptr.offset(curr),
-                BUF_LEN - curr as usize
-            )
-        );
+        return wr.write_all(slice::from_raw_parts(
+            buf_ptr.offset(curr),
+            BUF_LEN - curr as usize,
+        ));
     } else if exponent < 0 {
         let mut e = safe_abs(exponent);
 
         // Decimal number with a fraction that's fully printable
         if e < 18 {
             // eagerly decode 4 digits at a time
-            for _ in 0 .. e >> 2 {
+            for _ in 0..e >> 2 {
                 let rem = (n % 10000) as isize;
                 n /= 10000;
 
@@ -112,9 +114,10 @@ pub unsafe fn write<W: io::Write>(wr: &mut W, positive: bool, mut n: u64, expone
 
             write_num(&mut n, &mut curr, buf_ptr, lut_ptr);
 
-            return wr.write_all(
-                slice::from_raw_parts(buf_ptr.offset(curr), BUF_LEN - curr as usize)
-            );
+            return wr.write_all(slice::from_raw_parts(
+                buf_ptr.offset(curr),
+                BUF_LEN - curr as usize,
+            ));
         }
 
         // Not easily printable, write down fraction, then full number, then exponent
@@ -162,7 +165,6 @@ pub unsafe fn write<W: io::Write>(wr: &mut W, positive: bool, mut n: u64, expone
 
             let printed_so_far = BUF_LEN as u16 - curr as u16;
 
-
             if printed_so_far <= e {
                 // Subtract the amount of digits printed in the fraction
                 // from the exponent that we still need to print using
@@ -181,12 +183,10 @@ pub unsafe fn write<W: io::Write>(wr: &mut W, positive: bool, mut n: u64, expone
         }
 
         // Write out the number with a fraction
-        wr.write_all(
-            slice::from_raw_parts(
-                buf_ptr.offset(curr),
-                BUF_LEN - curr as usize
-            )
-        )?;
+        wr.write_all(slice::from_raw_parts(
+            buf_ptr.offset(curr),
+            BUF_LEN - curr as usize,
+        ))?;
 
         // Omit the 'e' notation for e == 0
         if e == 0 {
@@ -199,7 +199,6 @@ pub unsafe fn write<W: io::Write>(wr: &mut W, positive: bool, mut n: u64, expone
             wr.write_all(b"e-")?;
         }
         return write(wr, true, e as u64, 0);
-
     }
 
     // Exponent greater than 0
@@ -208,14 +207,12 @@ pub unsafe fn write<W: io::Write>(wr: &mut W, positive: bool, mut n: u64, expone
 
     // No need for `e` notation, just print out zeroes
     if (printed + exponent as usize) <= 20 {
-        wr.write_all(
-            slice::from_raw_parts(
-                buf_ptr.offset(curr),
-                BUF_LEN - curr as usize
-            )
-        )?;
+        wr.write_all(slice::from_raw_parts(
+            buf_ptr.offset(curr),
+            BUF_LEN - curr as usize,
+        ))?;
 
-        return wr.write_all(&ZEROFILL[ .. exponent as usize]);
+        return wr.write_all(&ZEROFILL[..exponent as usize]);
     }
 
     let mut e = exponent as u64;
@@ -228,17 +225,15 @@ pub unsafe fn write<W: io::Write>(wr: &mut W, positive: bool, mut n: u64, expone
         e += (printed as u64) - 1;
     }
 
-    wr.write_all(
-        slice::from_raw_parts(
-            buf_ptr.offset(curr),
-            BUF_LEN - curr as usize
-        )
-    )?;
+    wr.write_all(slice::from_raw_parts(
+        buf_ptr.offset(curr),
+        BUF_LEN - curr as usize,
+    ))?;
     wr.write_all(b"e")?;
     write(wr, true, e, 0)
 }
 
-fn safe_abs(x : i16) -> u16 {
+fn safe_abs(x: i16) -> u16 {
     if let Some(y) = x.checked_abs() {
         y as u16
     } else {

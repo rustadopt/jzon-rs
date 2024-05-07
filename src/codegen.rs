@@ -1,11 +1,11 @@
-use std::ptr;
-use std::io::Write;
 use std::io;
+use std::io::Write;
+use std::ptr;
 
-use crate::JsonValue;
 use crate::number::Number;
 use crate::object::Object;
 use crate::util::print_dec;
+use crate::JsonValue;
 
 const QU: u8 = b'"';
 const BS: u8 = b'\\';
@@ -19,23 +19,23 @@ const __: u8 = 0;
 
 // Look up table for characters that need escaping in a product string
 static ESCAPED: [u8; 256] = [
-// 0   1   2   3   4   5   6   7   8   9   A   B   C   D   E   F
-  UU, UU, UU, UU, UU, UU, UU, UU, BB, TT, NN, UU, FF, RR, UU, UU, // 0
-  UU, UU, UU, UU, UU, UU, UU, UU, UU, UU, UU, UU, UU, UU, UU, UU, // 1
-  __, __, QU, __, __, __, __, __, __, __, __, __, __, __, __, __, // 2
-  __, __, __, __, __, __, __, __, __, __, __, __, __, __, __, __, // 3
-  __, __, __, __, __, __, __, __, __, __, __, __, __, __, __, __, // 4
-  __, __, __, __, __, __, __, __, __, __, __, __, BS, __, __, __, // 5
-  __, __, __, __, __, __, __, __, __, __, __, __, __, __, __, __, // 6
-  __, __, __, __, __, __, __, __, __, __, __, __, __, __, __, __, // 7
-  __, __, __, __, __, __, __, __, __, __, __, __, __, __, __, __, // 8
-  __, __, __, __, __, __, __, __, __, __, __, __, __, __, __, __, // 9
-  __, __, __, __, __, __, __, __, __, __, __, __, __, __, __, __, // A
-  __, __, __, __, __, __, __, __, __, __, __, __, __, __, __, __, // B
-  __, __, __, __, __, __, __, __, __, __, __, __, __, __, __, __, // C
-  __, __, __, __, __, __, __, __, __, __, __, __, __, __, __, __, // D
-  __, __, __, __, __, __, __, __, __, __, __, __, __, __, __, __, // E
-  __, __, __, __, __, __, __, __, __, __, __, __, __, __, __, __, // F
+    // 0   1   2   3   4   5   6   7   8   9   A   B   C   D   E   F
+    UU, UU, UU, UU, UU, UU, UU, UU, BB, TT, NN, UU, FF, RR, UU, UU, // 0
+    UU, UU, UU, UU, UU, UU, UU, UU, UU, UU, UU, UU, UU, UU, UU, UU, // 1
+    __, __, QU, __, __, __, __, __, __, __, __, __, __, __, __, __, // 2
+    __, __, __, __, __, __, __, __, __, __, __, __, __, __, __, __, // 3
+    __, __, __, __, __, __, __, __, __, __, __, __, __, __, __, __, // 4
+    __, __, __, __, __, __, __, __, __, __, __, __, BS, __, __, __, // 5
+    __, __, __, __, __, __, __, __, __, __, __, __, __, __, __, __, // 6
+    __, __, __, __, __, __, __, __, __, __, __, __, __, __, __, __, // 7
+    __, __, __, __, __, __, __, __, __, __, __, __, __, __, __, __, // 8
+    __, __, __, __, __, __, __, __, __, __, __, __, __, __, __, __, // 9
+    __, __, __, __, __, __, __, __, __, __, __, __, __, __, __, __, // A
+    __, __, __, __, __, __, __, __, __, __, __, __, __, __, __, __, // B
+    __, __, __, __, __, __, __, __, __, __, __, __, __, __, __, __, // C
+    __, __, __, __, __, __, __, __, __, __, __, __, __, __, __, __, // D
+    __, __, __, __, __, __, __, __, __, __, __, __, __, __, __, __, // E
+    __, __, __, __, __, __, __, __, __, __, __, __, __, __, __, __, // F
 ];
 
 /// Default trait for serializing JSONValue into string.
@@ -57,7 +57,9 @@ pub trait Generator {
     fn write_min(&mut self, slice: &[u8], min: u8) -> io::Result<()>;
 
     #[inline(always)]
-    fn new_line(&mut self) -> io::Result<()> { Ok(()) }
+    fn new_line(&mut self) -> io::Result<()> {
+        Ok(())
+    }
 
     #[inline(always)]
     fn indent(&mut self) {}
@@ -67,12 +69,12 @@ pub trait Generator {
 
     #[inline(never)]
     fn write_string_complex(&mut self, string: &str, mut start: usize) -> io::Result<()> {
-        self.write(&string.as_bytes()[ .. start])?;
+        self.write(&string.as_bytes()[..start])?;
 
         for (index, ch) in string.bytes().enumerate().skip(start) {
             let escape = ESCAPED[ch as usize];
             if escape > 0 {
-                self.write(&string.as_bytes()[start .. index])?;
+                self.write(&string.as_bytes()[start..index])?;
                 self.write(&[b'\\', escape])?;
                 start = index + 1;
             }
@@ -80,7 +82,7 @@ pub trait Generator {
                 write!(self.get_writer(), "{:04x}", ch)?;
             }
         }
-        self.write(&string.as_bytes()[start ..])?;
+        self.write(&string.as_bytes()[start..])?;
 
         self.write_char(b'"')
     }
@@ -91,7 +93,7 @@ pub trait Generator {
 
         for (index, ch) in string.bytes().enumerate() {
             if ESCAPED[ch as usize] > 0 {
-                return self.write_string_complex(string, index)
+                return self.write_string_complex(string, index);
             }
         }
 
@@ -105,14 +107,7 @@ pub trait Generator {
             return self.write(b"null");
         }
         let (positive, mantissa, exponent) = num.as_parts();
-        unsafe {
-            print_dec::write(
-                self.get_writer(),
-                positive,
-                mantissa,
-                exponent
-            )
-        }
+        unsafe { print_dec::write(self.get_writer(), positive, mantissa, exponent) }
     }
 
     #[inline(always)]
@@ -146,13 +141,13 @@ pub trait Generator {
 
     fn write_json(&mut self, json: &JsonValue) -> io::Result<()> {
         match *json {
-            JsonValue::Null               => self.write(b"null"),
-            JsonValue::Short(ref short)   => self.write_string(short.as_str()),
+            JsonValue::Null => self.write(b"null"),
+            JsonValue::Short(ref short) => self.write_string(short.as_str()),
             JsonValue::String(ref string) => self.write_string(string),
             JsonValue::Number(ref number) => self.write_number(number),
-            JsonValue::Boolean(true)      => self.write(b"true"),
-            JsonValue::Boolean(false)     => self.write(b"false"),
-            JsonValue::Array(ref array)   => {
+            JsonValue::Boolean(true) => self.write(b"true"),
+            JsonValue::Boolean(false) => self.write(b"false"),
+            JsonValue::Array(ref array) => {
                 self.write_char(b'[')?;
                 let mut iter = array.iter();
 
@@ -174,10 +169,8 @@ pub trait Generator {
                 self.dedent();
                 self.new_line()?;
                 self.write_char(b']')
-            },
-            JsonValue::Object(ref object) => {
-                self.write_object(object)
             }
+            JsonValue::Object(ref object) => self.write_object(object),
         }
     }
 }
@@ -239,7 +232,7 @@ impl PrettyGenerator {
         PrettyGenerator {
             code: Vec::with_capacity(1024),
             dent: 0,
-            spaces_per_indent: spaces
+            spaces_per_indent: spaces,
         }
     }
 
@@ -293,18 +286,22 @@ impl Generator for PrettyGenerator {
 
 /// Writer Generator, this uses a custom writer to store the JSON result.
 pub struct WriterGenerator<'a, W: 'a + Write> {
-    writer: &'a mut W
+    writer: &'a mut W,
 }
 
-impl<'a, W> WriterGenerator<'a, W> where W: 'a + Write {
+impl<'a, W> WriterGenerator<'a, W>
+where
+    W: 'a + Write,
+{
     pub fn new(writer: &'a mut W) -> Self {
-        WriterGenerator {
-            writer: writer
-        }
+        WriterGenerator { writer: writer }
     }
 }
 
-impl<'a, W> Generator for WriterGenerator<'a, W> where W: Write {
+impl<'a, W> Generator for WriterGenerator<'a, W>
+where
+    W: Write,
+{
     type T = W;
 
     #[inline(always)]
@@ -325,7 +322,10 @@ pub struct PrettyWriterGenerator<'a, W: 'a + Write> {
     spaces_per_indent: u16,
 }
 
-impl<'a, W> PrettyWriterGenerator<'a, W> where W: 'a + Write {
+impl<'a, W> PrettyWriterGenerator<'a, W>
+where
+    W: 'a + Write,
+{
     pub fn new(writer: &'a mut W, spaces: u16) -> Self {
         PrettyWriterGenerator {
             writer: writer,
@@ -335,7 +335,10 @@ impl<'a, W> PrettyWriterGenerator<'a, W> where W: 'a + Write {
     }
 }
 
-impl<'a, W> Generator for PrettyWriterGenerator<'a, W> where W: Write {
+impl<'a, W> Generator for PrettyWriterGenerator<'a, W>
+where
+    W: Write,
+{
     type T = W;
 
     #[inline(always)]
@@ -383,7 +386,8 @@ fn extend_from_slice(dst: &mut Vec<u8>, src: &[u8]) {
         ptr::copy_nonoverlapping(
             src.as_ptr(),
             dst.as_mut_ptr().offset(dst_len as isize),
-            src_len);
+            src_len,
+        );
     }
 }
 
@@ -395,9 +399,7 @@ mod tests {
     #[test]
     fn should_not_panic_on_bad_bytes() {
         let data = [0, 12, 128, 88, 64, 99].to_vec();
-        let s = unsafe {
-            String::from_utf8_unchecked(data)
-        };
+        let s = unsafe { String::from_utf8_unchecked(data) };
 
         let mut generator = DumpGenerator::new();
         generator.write_string(&s).unwrap();
@@ -406,9 +408,7 @@ mod tests {
     #[test]
     fn should_not_panic_on_bad_bytes_2() {
         let data = b"\x48\x48\x48\x57\x03\xE8\x48\x48\xE8\x03\x8F\x48\x29\x48\x48";
-        let s = unsafe {
-            String::from_utf8_unchecked(data.to_vec())
-        };
+        let s = unsafe { String::from_utf8_unchecked(data.to_vec()) };
 
         let mut generator = DumpGenerator::new();
         generator.write_string(&s).unwrap();

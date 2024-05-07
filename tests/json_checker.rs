@@ -239,7 +239,8 @@ mod json_checker_pass {
 
     #[test]
     fn pass_3() {
-        parse(r#"
+        parse(
+            r#"
 
         {
             "JSON Test Pattern pass3": {
@@ -248,7 +249,9 @@ mod json_checker_pass {
             }
         }
 
-        "#).unwrap();
+        "#,
+        )
+        .unwrap();
 
         assert!(true);
     }
