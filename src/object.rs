@@ -1,8 +1,8 @@
-use std::{ ptr, mem, str, slice, vec, fmt };
-use std::ops::{ Index, IndexMut, Deref };
 use std::iter::FromIterator;
+use std::ops::{Deref, Index, IndexMut};
+use std::{fmt, mem, ptr, slice, str, vec};
 
-use crate::codegen::{ DumpGenerator, Generator, PrettyGenerator };
+use crate::codegen::{DumpGenerator, Generator, PrettyGenerator};
 use crate::value::JsonValue;
 
 const KEY_BUF_LEN: usize = 32;
@@ -71,24 +71,20 @@ impl Key {
     fn new(hash: u64, len: usize) -> Self {
         Key {
             buf: [0; KEY_BUF_LEN],
-            len: len,
+            len,
             ptr: ptr::null_mut(),
-            hash: hash
+            hash,
         }
     }
 
     #[inline]
     fn as_bytes(&self) -> &[u8] {
-        unsafe {
-            slice::from_raw_parts(self.ptr, self.len)
-        }
+        unsafe { slice::from_raw_parts(self.ptr, self.len) }
     }
 
     #[inline]
     fn as_str(&self) -> &str {
-        unsafe {
-            str::from_utf8_unchecked(self.as_bytes())
-        }
+        unsafe { str::from_utf8_unchecked(self.as_bytes()) }
     }
 
     // The `buf` on the `Key` can only be filled after the struct
@@ -99,11 +95,7 @@ impl Key {
     fn attach(&mut self, key: &[u8]) {
         if self.len <= KEY_BUF_LEN {
             unsafe {
-                ptr::copy_nonoverlapping(
-                    key.as_ptr(),
-                    self.buf.as_mut_ptr(),
-                    self.len
-                );
+                ptr::copy_nonoverlapping(key.as_ptr(), self.buf.as_mut_ptr(), self.len);
             }
             self.ptr = self.buf.as_mut_ptr();
         } else {
@@ -137,11 +129,7 @@ impl Drop for Key {
             if self.len > KEY_BUF_LEN {
                 // Construct a `Vec` out of the `key_ptr`. Since the key is
                 // always allocated from a slice, the capacity is equal to length.
-                let heap = Vec::from_raw_parts(
-                    self.ptr,
-                    self.len,
-                    self.len
-                );
+                let heap = Vec::from_raw_parts(self.ptr, self.len, self.len);
 
                 // Now that we have an owned `Vec<u8>`, drop it.
                 drop(heap);
@@ -162,7 +150,7 @@ impl Clone for Key {
             Key {
                 buf: [0; KEY_BUF_LEN],
                 len: self.len,
-                ptr: ptr,
+                ptr,
                 hash: self.hash,
             }
         } else {
@@ -182,11 +170,7 @@ impl From<Key> for String {
             if key.len > KEY_BUF_LEN {
                 // Construct a `String` out of the `key_ptr`. Since the key is
                 // always allocated from a slice, the capacity is equal to length.
-                String::from_raw_parts(
-                    key.ptr,
-                    key.len,
-                    key.len
-                )
+                String::from_raw_parts(key.ptr, key.len, key.len)
             } else {
                 String::from_utf8_unchecked(key.buf[0..key.len].to_vec())
             }
@@ -221,9 +205,9 @@ impl fmt::Debug for Node {
 
 impl PartialEq for Node {
     fn eq(&self, other: &Node) -> bool {
-        self.key.hash       == other.key.hash       &&
-        self.key.as_bytes() == other.key.as_bytes() &&
-        self.value          == other.value
+        self.key.hash == other.key.hash
+            && self.key.as_bytes() == other.key.as_bytes()
+            && self.value == other.value
     }
 }
 
@@ -232,7 +216,7 @@ impl Node {
     fn new(value: JsonValue, hash: u64, len: usize) -> Node {
         Node {
             key: Key::new(hash, len),
-            value: value,
+            value,
             left: 0,
             right: 0,
         }
@@ -244,7 +228,13 @@ impl Node {
 /// using the `JsonValue::Object` variant, which wraps around this struct.
 #[derive(Debug)]
 pub struct Object {
-    store: Vec<Node>
+    store: Vec<Node>,
+}
+
+impl Default for Object {
+    fn default() -> Self {
+        Self::new()
+    }
 }
 
 impl Object {
@@ -252,9 +242,7 @@ impl Object {
     /// allocation until a value is inserted into it.
     #[inline(always)]
     pub fn new() -> Self {
-        Object {
-            store: Vec::new()
-        }
+        Object { store: Vec::new() }
     }
 
     /// Create a new `Object` with memory preallocated for `capacity` number
@@ -262,13 +250,13 @@ impl Object {
     #[inline(always)]
     pub fn with_capacity(capacity: usize) -> Self {
         Object {
-            store: Vec::with_capacity(capacity)
+            store: Vec::with_capacity(capacity),
         }
     }
 
     #[inline]
     fn node_at_index_mut(&mut self, index: usize) -> *mut Node {
-        unsafe { self.store.as_mut_ptr().offset(index as isize) }
+        unsafe { self.store.as_mut_ptr().add(index) }
     }
 
     #[inline(always)]
@@ -288,7 +276,7 @@ impl Object {
                 // copy than write. Difference in benchmarks wasn't big though.
                 ptr::copy_nonoverlapping(
                     &node as *const Node,
-                    self.store.as_mut_ptr().offset(index as isize),
+                    self.store.as_mut_ptr().add(index),
                     1,
                 );
 
@@ -326,7 +314,7 @@ impl Object {
         let key = key.as_bytes();
         let hash = hash_key(key);
 
-        if self.store.len() == 0 {
+        if self.store.is_empty() {
             self.store.push(Node::new(value, hash, key.len()));
             self.store[0].key.attach(key);
             return 0;
@@ -369,7 +357,7 @@ impl Object {
     }
 
     #[inline]
-    #[deprecated(since="0.11.11", note="Was only meant for internal use")]
+    #[deprecated(since = "0.11.11", note = "Was only meant for internal use")]
     pub fn override_last(&mut self, value: JsonValue) {
         if let Some(node) = self.store.last_mut() {
             node.value = value;
@@ -377,7 +365,7 @@ impl Object {
     }
 
     pub fn get(&self, key: &str) -> Option<&JsonValue> {
-        if self.store.len() == 0 {
+        if self.store.is_empty() {
             return None;
         }
 
@@ -404,7 +392,7 @@ impl Object {
     }
 
     pub fn get_mut(&mut self, key: &str) -> Option<&mut JsonValue> {
-        if self.store.len() == 0 {
+        if self.store.is_empty() {
             return None;
         }
 
@@ -442,7 +430,7 @@ impl Object {
     /// Attempts to remove the value behind `key`, if successful
     /// will return the `JsonValue` stored behind the `key`.
     pub fn remove(&mut self, key: &str) -> Option<JsonValue> {
-        if self.store.len() == 0 {
+        if self.store.is_empty() {
             return None;
         }
 
@@ -515,14 +503,14 @@ impl Object {
     #[inline(always)]
     pub fn iter(&self) -> Iter {
         Iter {
-            inner: self.store.iter()
+            inner: self.store.iter(),
         }
     }
 
     #[inline(always)]
     pub fn iter_mut(&mut self) -> IterMut {
         IterMut {
-            inner: self.store.iter_mut()
+            inner: self.store.iter_mut(),
         }
     }
 
@@ -552,14 +540,12 @@ impl Clone for Object {
             node.key.fix_ptr();
         }
 
-        Object {
-            store: store
-        }
+        Object { store }
     }
 }
 
 impl<K: AsRef<str>, V: Into<JsonValue>> FromIterator<(K, V)> for Object {
-    fn from_iter<I: IntoIterator<Item=(K, V)>>(iter: I) -> Self {
+    fn from_iter<I: IntoIterator<Item = (K, V)>>(iter: I) -> Self {
         let iter = iter.into_iter();
         let mut object = Object::with_capacity(iter.size_hint().0);
 
@@ -582,8 +568,12 @@ impl PartialEq for Object {
 
         for (key, value) in self.iter() {
             match other.get(key) {
-                Some(ref other_val) => if *other_val != value { return false; },
-                None                => return false
+                Some(other_val) => {
+                    if other_val != value {
+                        return false;
+                    }
+                }
+                None => return false,
             }
         }
 
@@ -592,15 +582,13 @@ impl PartialEq for Object {
 }
 
 pub struct Iter<'a> {
-    inner: slice::Iter<'a, Node>
+    inner: slice::Iter<'a, Node>,
 }
 
 impl<'a> Iter<'a> {
     /// Create an empty iterator that always returns `None`
     pub fn empty() -> Self {
-        Iter {
-            inner: [].iter()
-        }
+        Iter { inner: [].iter() }
     }
 }
 
@@ -609,14 +597,18 @@ impl<'a> Iterator for Iter<'a> {
 
     #[inline(always)]
     fn next(&mut self) -> Option<Self::Item> {
-        self.inner.next().map(|node| (node.key.as_str(), &node.value))
+        self.inner
+            .next()
+            .map(|node| (node.key.as_str(), &node.value))
     }
 }
 
 impl<'a> DoubleEndedIterator for Iter<'a> {
     #[inline(always)]
     fn next_back(&mut self) -> Option<Self::Item> {
-        self.inner.next_back().map(|node| (node.key.as_str(), &node.value))
+        self.inner
+            .next_back()
+            .map(|node| (node.key.as_str(), &node.value))
     }
 }
 
@@ -627,14 +619,14 @@ impl<'a> ExactSizeIterator for Iter<'a> {
 }
 
 pub struct IterMut<'a> {
-    inner: slice::IterMut<'a, Node>
+    inner: slice::IterMut<'a, Node>,
 }
 
 impl<'a> IterMut<'a> {
     /// Create an empty iterator that always returns `None`
     pub fn empty() -> Self {
         IterMut {
-            inner: [].iter_mut()
+            inner: [].iter_mut(),
         }
     }
 }
@@ -644,14 +636,18 @@ impl<'a> Iterator for IterMut<'a> {
 
     #[inline(always)]
     fn next(&mut self) -> Option<Self::Item> {
-        self.inner.next().map(|node| (node.key.as_str(), &mut node.value))
+        self.inner
+            .next()
+            .map(|node| (node.key.as_str(), &mut node.value))
     }
 }
 
 impl<'a> DoubleEndedIterator for IterMut<'a> {
     #[inline(always)]
     fn next_back(&mut self) -> Option<Self::Item> {
-        self.inner.next_back().map(|node| (node.key.as_str(), &mut node.value))
+        self.inner
+            .next_back()
+            .map(|node| (node.key.as_str(), &mut node.value))
     }
 }
 
@@ -662,7 +658,7 @@ impl<'a> ExactSizeIterator for IterMut<'a> {
 }
 
 pub struct IntoIter {
-    inner: vec::IntoIter<Node>
+    inner: vec::IntoIter<Node>,
 }
 
 impl Iterator for IntoIter {
@@ -677,7 +673,9 @@ impl Iterator for IntoIter {
 impl DoubleEndedIterator for IntoIter {
     #[inline(always)]
     fn next_back(&mut self) -> Option<Self::Item> {
-        self.inner.next_back().map(|node| (node.key.into(), node.value))
+        self.inner
+            .next_back()
+            .map(|node| (node.key.into(), node.value))
     }
 }
 
@@ -695,7 +693,7 @@ impl IntoIterator for Object {
     #[inline(always)]
     fn into_iter(self) -> IntoIter {
         IntoIter {
-            inner: self.store.into_iter()
+            inner: self.store.into_iter(),
         }
     }
 }
@@ -726,7 +724,7 @@ impl<'a> Index<&'a str> for Object {
     fn index(&self, index: &str) -> &JsonValue {
         match self.get(index) {
             Some(value) => value,
-            _ => &NULL
+            _ => &NULL,
         }
     }
 }

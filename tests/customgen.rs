@@ -11,6 +11,12 @@ pub struct CustomGenerator {
     code: Vec<u8>,
 }
 
+impl Default for CustomGenerator {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
 impl CustomGenerator {
     pub fn new() -> Self {
         CustomGenerator {

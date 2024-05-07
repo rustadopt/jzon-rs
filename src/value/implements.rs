@@ -3,9 +3,9 @@
 
 use std::collections::{BTreeMap, HashMap};
 
-use crate::short::{self, Short};
 use crate::number::Number;
 use crate::object::Object;
+use crate::short::{self, Short};
 use crate::value::JsonValue;
 
 macro_rules! implement_eq {
@@ -14,7 +14,7 @@ macro_rules! implement_eq {
             fn eq(&self, other: &$from) -> bool {
                 match *self {
                     JsonValue::$to(ref value) => value == other,
-                    _                         => false
+                    _ => false,
                 }
             }
         }
@@ -23,7 +23,7 @@ macro_rules! implement_eq {
             fn eq(&self, other: &$from) -> bool {
                 match **self {
                     JsonValue::$to(ref value) => value == other,
-                    _                         => false
+                    _ => false,
                 }
             }
         }
@@ -32,11 +32,11 @@ macro_rules! implement_eq {
             fn eq(&self, other: &JsonValue) -> bool {
                 match *other {
                     JsonValue::$to(ref value) => value == self,
-                    _ => false
+                    _ => false,
                 }
             }
         }
-    }
+    };
 }
 
 macro_rules! implement {
@@ -57,7 +57,7 @@ macro_rules! implement {
         }
 
         implement_eq!($to, $from);
-    }
+    };
 }
 
 impl<'a> From<&'a str> for JsonValue {
@@ -74,7 +74,7 @@ impl<T: Into<JsonValue>> From<Option<T>> for JsonValue {
     fn from(val: Option<T>) -> JsonValue {
         match val {
             Some(val) => val.into(),
-            None      => JsonValue::Null,
+            None => JsonValue::Null,
         }
     }
 }
@@ -106,9 +106,9 @@ impl<K: AsRef<str>, V: Into<JsonValue>> From<BTreeMap<K, V>> for JsonValue {
 impl<'a> PartialEq<&'a str> for JsonValue {
     fn eq(&self, other: &&str) -> bool {
         match *self {
-            JsonValue::Short(ref value)  => value == *other,
+            JsonValue::Short(ref value) => value == *other,
             JsonValue::String(ref value) => value == *other,
-            _ => false
+            _ => false,
         }
     }
 }
@@ -116,9 +116,9 @@ impl<'a> PartialEq<&'a str> for JsonValue {
 impl<'a> PartialEq<JsonValue> for &'a str {
     fn eq(&self, other: &JsonValue) -> bool {
         match *other {
-            JsonValue::Short(ref value)  => value == *self,
+            JsonValue::Short(ref value) => value == *self,
             JsonValue::String(ref value) => value == *self,
-            _ => false
+            _ => false,
         }
     }
 }
@@ -126,9 +126,9 @@ impl<'a> PartialEq<JsonValue> for &'a str {
 impl PartialEq<str> for JsonValue {
     fn eq(&self, other: &str) -> bool {
         match *self {
-            JsonValue::Short(ref value)  => value == other,
+            JsonValue::Short(ref value) => value == other,
             JsonValue::String(ref value) => value == other,
-            _ => false
+            _ => false,
         }
     }
 }
@@ -136,9 +136,9 @@ impl PartialEq<str> for JsonValue {
 impl<'a> PartialEq<JsonValue> for str {
     fn eq(&self, other: &JsonValue) -> bool {
         match *other {
-            JsonValue::Short(ref value)  => value == self,
+            JsonValue::Short(ref value) => value == self,
             JsonValue::String(ref value) => value == self,
-            _ => false
+            _ => false,
         }
     }
 }

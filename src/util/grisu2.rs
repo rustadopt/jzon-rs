@@ -15,13 +15,15 @@
 // option. This file may not be copied, modified, or distributed
 // except according to those terms.
 
-use crate::util::diyfp::{ self, DiyFp };
+use crate::util::diyfp::{self, DiyFp};
 
 #[inline]
 unsafe fn grisu_round(buffer: &mut u64, delta: u64, mut rest: u64, ten_kappa: u64, wp_w: u64) {
-    while rest < wp_w && delta - rest >= ten_kappa &&
-           (rest + ten_kappa < wp_w || // closer
-            wp_w - rest > rest + ten_kappa - wp_w) {
+    while rest < wp_w
+        && delta - rest >= ten_kappa
+        && (rest + ten_kappa < wp_w || // closer
+            wp_w - rest > rest + ten_kappa - wp_w)
+    {
         *buffer -= 1;
         rest += ten_kappa;
     }
@@ -29,21 +31,34 @@ unsafe fn grisu_round(buffer: &mut u64, delta: u64, mut rest: u64, ten_kappa: u6
 
 #[inline]
 fn count_decimal_digit32(n: u32) -> i16 {
-    if n < 10 { 1 }
-    else if n < 100 { 2 }
-    else if n < 1000 { 3 }
-    else if n < 10000 { 4 }
-    else if n < 100000 { 5 }
-    else if n < 1000000 { 6 }
-    else if n < 10000000 { 7 }
-    else if n < 100000000 { 8 }
+    if n < 10 {
+        1
+    } else if n < 100 {
+        2
+    } else if n < 1000 {
+        3
+    } else if n < 10000 {
+        4
+    } else if n < 100000 {
+        5
+    } else if n < 1000000 {
+        6
+    } else if n < 10000000 {
+        7
+    } else if n < 100000000 {
+        8
+    }
     // Will not reach 10 digits in digit_gen()
-    else { 9 }
+    else {
+        9
+    }
 }
 
 #[inline]
 unsafe fn digit_gen(w: DiyFp, mp: DiyFp, mut delta: u64, mut k: i16) -> (u64, i16) {
-    static POW10: [u32; 10] = [ 1, 10, 100, 1000, 10000, 100000, 1000000, 10000000, 100000000, 1000000000 ];
+    static POW10: [u32; 10] = [
+        1, 10, 100, 1000, 10000, 100000, 1000000, 10000000, 100000000, 1000000000,
+    ];
     let one = DiyFp::new(1u64 << -mp.e, mp.e);
     let wp_w = mp - w;
     let mut p1 = (mp.f >> -one.e) as u32;
@@ -54,15 +69,33 @@ unsafe fn digit_gen(w: DiyFp, mp: DiyFp, mut delta: u64, mut k: i16) -> (u64, i1
 
     while kappa > 0 {
         match kappa {
-            9 => { p1 %=  100000000; }
-            8 => { p1 %=   10000000; }
-            7 => { p1 %=    1000000; }
-            6 => { p1 %=     100000; }
-            5 => { p1 %=      10000; }
-            4 => { p1 %=       1000; }
-            3 => { p1 %=        100; }
-            2 => { p1 %=         10; }
-            1 => { p1 =           0; }
+            9 => {
+                p1 %= 100000000;
+            }
+            8 => {
+                p1 %= 10000000;
+            }
+            7 => {
+                p1 %= 1000000;
+            }
+            6 => {
+                p1 %= 100000;
+            }
+            5 => {
+                p1 %= 10000;
+            }
+            4 => {
+                p1 %= 1000;
+            }
+            3 => {
+                p1 %= 100;
+            }
+            2 => {
+                p1 %= 10;
+            }
+            1 => {
+                p1 = 0;
+            }
             _ => {}
         }
         kappa = kappa.wrapping_sub(1);
@@ -90,7 +123,18 @@ unsafe fn digit_gen(w: DiyFp, mp: DiyFp, mut delta: u64, mut k: i16) -> (u64, i1
             k += kappa;
             let index = -(kappa as isize);
 
-            grisu_round(&mut buffer, delta, p2, one.f, wp_w.f * if index < 9 { POW10[-(kappa as isize) as usize] as u64 } else { 0 });
+            grisu_round(
+                &mut buffer,
+                delta,
+                p2,
+                one.f,
+                wp_w.f
+                    * if index < 9 {
+                        POW10[-(kappa as isize) as usize] as u64
+                    } else {
+                        0
+                    },
+            );
             return (buffer, k);
         }
     }

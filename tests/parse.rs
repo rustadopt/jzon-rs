@@ -2,7 +2,7 @@
 extern crate jzon;
 
 use jzon::number::Number;
-use jzon::{ parse, JsonValue, Null };
+use jzon::{parse, JsonValue, Null};
 
 #[test]
 fn parse_true() {
@@ -47,14 +47,18 @@ fn parse_very_long_float() {
     assert_eq!(parsed.as_f64().unwrap(), 2.225073858507201e-308);
 
     // Exhausts u64
-    assert_eq!(parsed, unsafe { Number::from_parts_unchecked(true, 2225073858507201136, -326) });
+    assert_eq!(parsed, unsafe {
+        Number::from_parts_unchecked(true, 2225073858507201136, -326)
+    });
 }
 
 #[test]
 fn parse_very_long_exponent() {
     let parsed = parse("1e999999999999999999999999999999999999999999999999999999999999").unwrap();
 
-    assert_eq!(parsed, unsafe { Number::from_parts_unchecked(true, 1, 32767) });
+    assert_eq!(parsed, unsafe {
+        Number::from_parts_unchecked(true, 1, 32767)
+    });
 }
 
 #[test]
@@ -107,17 +111,18 @@ fn parse_number_with_invalid_e() {
 
 #[test]
 fn parse_large_number() {
-    assert_eq!(parse("18446744073709551616").unwrap(), 18446744073709552000f64);
+    assert_eq!(
+        parse("18446744073709551616").unwrap(),
+        18446744073709552000f64
+    );
 }
 
 #[test]
 fn parse_array() {
-    assert_eq!(parse(r#"[10, "foo", true, null]"#).unwrap(), array![
-        10,
-        "foo",
-        true,
-        null
-    ]);
+    assert_eq!(
+        parse(r#"[10, "foo", true, null]"#).unwrap(),
+        array![10, "foo", true, null]
+    );
 
     assert_eq!(parse("[]").unwrap(), array![]);
 
@@ -127,35 +132,49 @@ fn parse_array() {
 #[test]
 fn parse_object() {
     // Without trailing comma
-    assert_eq!(parse(r#"
+    assert_eq!(
+        parse(
+            r#"
 
     {
         "foo": "bar",
         "num": 10
     }
 
-    "#).unwrap(), object!{
-        foo: "bar",
-        num: 10
-    });
+    "#
+        )
+        .unwrap(),
+        object! {
+            foo: "bar",
+            num: 10
+        }
+    );
 
     // Trailing comma in macro
-    assert_eq!(parse(r#"
+    assert_eq!(
+        parse(
+            r#"
 
     {
         "foo": "bar",
         "num": 10
     }
 
-    "#).unwrap(), object!{
-        foo: "bar",
-        num: 10,
-    });
+    "#
+        )
+        .unwrap(),
+        object! {
+            foo: "bar",
+            num: 10,
+        }
+    );
 }
 
 #[test]
 fn parse_object_duplicate_fields() {
-    assert_eq!(parse(r#"
+    assert_eq!(
+        parse(
+            r#"
 
     {
         "foo": 0,
@@ -163,28 +182,40 @@ fn parse_object_duplicate_fields() {
         "foo": 2
     }
 
-    "#).unwrap(), object!{
-        foo: 2,
-        bar: 1
-    });
+    "#
+        )
+        .unwrap(),
+        object! {
+            foo: 2,
+            bar: 1
+        }
+    );
 }
 
 #[test]
-fn parse_object_with_array(){
-    assert_eq!(parse(r#"
+fn parse_object_with_array() {
+    assert_eq!(
+        parse(
+            r#"
 
     {
         "foo": [1, 2, 3]
     }
 
-    "#).unwrap(), object!{
-        foo: [1, 2, 3]
-    });
+    "#
+        )
+        .unwrap(),
+        object! {
+            foo: [1, 2, 3]
+        }
+    );
 }
 
 #[test]
 fn parse_nested_object() {
-    assert_eq!(parse(r#"
+    assert_eq!(
+        parse(
+            r#"
 
     {
         "l10n": [ {
@@ -196,34 +227,41 @@ fn parse_nested_object() {
         } ]
     }
 
-    "#).unwrap(), object!{
-        l10n: [ {
-            product: {
-                inStock: {
-                    DE: "Lieferung innerhalb von 1-3 Werktagen"
+    "#
+        )
+        .unwrap(),
+        object! {
+            l10n: [ {
+                product: {
+                    inStock: {
+                        DE: "Lieferung innerhalb von 1-3 Werktagen"
+                    }
                 }
-            }
-        } ]
-    });
+            } ]
+        }
+    );
 }
 
 #[test]
 fn parse_and_index_from_object() {
     let data = parse("{ \"pi\": 3.14 }").unwrap();
-    let ref pi = data["pi"];
+    let pi = &data["pi"];
 
     assert_eq!(pi, 3.14);
 }
 
 #[test]
 fn parse_and_index_mut_from_object() {
-    let mut data = parse(r#"
+    let mut data = parse(
+        r#"
 
     {
         "foo": 100
     }
 
-    "#).unwrap();
+    "#,
+    )
+    .unwrap();
 
     assert_eq!(data["foo"], 100);
 
@@ -277,11 +315,14 @@ fn parse_and_index_mut_from_array() {
 
 #[test]
 fn parse_escaped_characters() {
-    let data = parse(r#"
+    let data = parse(
+        r#"
 
     "\r\n\t\b\f\\\/\""
 
-    "#).unwrap();
+    "#,
+    )
+    .unwrap();
 
     assert!(data.is_string());
     assert_eq!(data, "\r\n\t\u{8}\u{c}\\/\"");
@@ -289,33 +330,41 @@ fn parse_escaped_characters() {
 
 #[test]
 fn parse_escaped_unicode() {
-    let data = parse(r#"
+    let data = parse(
+        r#"
 
     "\u2764\ufe0f"
 
-    "#).unwrap();
+    "#,
+    )
+    .unwrap();
 
     assert_eq!(data, "❤️");
 }
 
 #[test]
 fn parse_escaped_unicode_surrogate() {
-    let data = parse(r#"
+    let data = parse(
+        r#"
 
     "\uD834\uDD1E"
 
-    "#).unwrap();
+    "#,
+    )
+    .unwrap();
 
     assert_eq!(data, "𝄞");
 }
 
 #[test]
 fn parse_escaped_unicode_surrogate_fail() {
-    let err = parse(r#"
+    let err = parse(
+        r#"
 
     "\uD834 \uDD1E"
 
-    "#);
+    "#,
+    );
 
     assert!(err.is_err());
 }

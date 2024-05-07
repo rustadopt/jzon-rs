@@ -1,9 +1,9 @@
 #[macro_use]
 extern crate jzon;
 
-use std::collections::{ HashMap, BTreeMap };
+use jzon::{parse, stringify, stringify_pretty, JsonValue, Null};
+use std::collections::{BTreeMap, HashMap};
 use std::f64;
-use jzon::{ parse, stringify, stringify_pretty, JsonValue, Null };
 
 #[test]
 fn stringify_null() {
@@ -139,7 +139,7 @@ fn stringify_typed_opt_vec() {
 
 #[test]
 fn stringify_object() {
-    let object = object!{
+    let object = object! {
         name: "Maciej",
         age: 30
     };
@@ -182,10 +182,13 @@ fn stringify_hash_map() {
     // compare parsed objects.
     let parsed = parse(&stringify(map)).unwrap();
 
-    assert_eq!(parsed, object!{
-        name: "Maciej",
-        age: 30
-    });
+    assert_eq!(
+        parsed,
+        object! {
+            name: "Maciej",
+            age: 30
+        }
+    );
 }
 
 #[test]
@@ -213,7 +216,10 @@ fn stringify_array_with_push() {
 
 #[test]
 fn stringify_escaped_characters() {
-    assert_eq!(stringify("\r____\n___\t\u{8}\u{c}\\\"__"), r#""\r____\n___\t\b\f\\\"__""#);
+    assert_eq!(
+        stringify("\r____\n___\t\u{8}\u{c}\\\"__"),
+        r#""\r____\n___\t\b\f\\\"__""#
+    );
 }
 
 #[test]
@@ -223,17 +229,23 @@ fn stringify_dont_escape_forward_slash() {
 
 #[test]
 fn stringify_escaped() {
-    assert_eq!(stringify("http://www.google.com/\t"), r#""http://www.google.com/\t""#);
+    assert_eq!(
+        stringify("http://www.google.com/\t"),
+        r#""http://www.google.com/\t""#
+    );
 }
 
 #[test]
 fn stringify_control_escaped() {
-    assert_eq!(stringify("foo\u{1f}bar\u{0}baz"), r#""foo\u001fbar\u0000baz""#);
+    assert_eq!(
+        stringify("foo\u{1f}bar\u{0}baz"),
+        r#""foo\u001fbar\u0000baz""#
+    );
 }
 
 #[test]
 fn stringify_pretty_object() {
-    let object = object!{
+    let object = object! {
         name: "Urlich",
         age: 50,
         parents: {

@@ -1,4 +1,4 @@
-use std::{ char, error, fmt };
+use std::{char, error, fmt};
 
 /// Error type of this crate.
 ///
@@ -35,10 +35,10 @@ impl fmt::Display for Error {
                 ref column,
             } => write!(f, "Unexpected character: {} at ({}:{})", ch, line, column),
 
-            UnexpectedEndOfJson   => write!(f, "Unexpected end of JSON"),
-            ExceededDepthLimit    => write!(f, "Exceeded depth limit"),
-            FailedUtf8Parsing     => write!(f, "Failed to parse UTF-8 bytes"),
-            WrongType(ref s)      => write!(f, "Wrong type, expected: {}", s),
+            UnexpectedEndOfJson => write!(f, "Unexpected end of JSON"),
+            ExceededDepthLimit => write!(f, "Exceeded depth limit"),
+            FailedUtf8Parsing => write!(f, "Failed to parse UTF-8 bytes"),
+            WrongType(ref s) => write!(f, "Wrong type, expected: {}", s),
         }
     }
 }
@@ -49,10 +49,10 @@ impl error::Error for Error {
 
         match *self {
             UnexpectedCharacter { .. } => "Unexpected character",
-            UnexpectedEndOfJson        => "Unexpected end of JSON",
-            ExceededDepthLimit         => "Exceeded depth limit",
-            FailedUtf8Parsing          => "Failed to read bytes as UTF-8 from JSON",
-            WrongType(_)               => "Wrong type",
+            UnexpectedEndOfJson => "Unexpected end of JSON",
+            ExceededDepthLimit => "Exceeded depth limit",
+            FailedUtf8Parsing => "Failed to read bytes as UTF-8 from JSON",
+            WrongType(_) => "Wrong type",
         }
     }
 }
