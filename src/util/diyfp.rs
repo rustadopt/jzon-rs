@@ -27,7 +27,7 @@ pub struct DiyFp {
 
 impl DiyFp {
     pub fn new(f: u64, e: isize) -> Self {
-        DiyFp { f: f, e: e }
+        DiyFp { f, e }
     }
 
     /*

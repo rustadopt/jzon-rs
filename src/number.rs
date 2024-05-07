@@ -63,8 +63,8 @@ impl Number {
     pub unsafe fn from_parts_unchecked(positive: bool, mantissa: u64, exponent: i16) -> Self {
         Number {
             category: positive as u8,
-            exponent: exponent,
-            mantissa: mantissa,
+            exponent,
+            mantissa,
         }
     }
 
@@ -206,7 +206,7 @@ impl PartialEq for Number {
         let e_diff = self.exponent - other.exponent;
 
         if e_diff == 0 {
-            return self.mantissa == other.mantissa;
+            self.mantissa == other.mantissa
         } else if e_diff > 0 {
             let power = decimal_power(e_diff as u16);
 

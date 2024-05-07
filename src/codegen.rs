@@ -180,6 +180,12 @@ pub struct DumpGenerator {
     code: Vec<u8>,
 }
 
+impl Default for DumpGenerator {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
 impl DumpGenerator {
     pub fn new() -> Self {
         DumpGenerator {
@@ -294,7 +300,7 @@ where
     W: 'a + Write,
 {
     pub fn new(writer: &'a mut W) -> Self {
-        WriterGenerator { writer: writer }
+        WriterGenerator { writer }
     }
 }
 
@@ -306,7 +312,7 @@ where
 
     #[inline(always)]
     fn get_writer(&mut self) -> &mut W {
-        &mut self.writer
+        self.writer
     }
 
     #[inline(always)]
@@ -328,7 +334,7 @@ where
 {
     pub fn new(writer: &'a mut W, spaces: u16) -> Self {
         PrettyWriterGenerator {
-            writer: writer,
+            writer,
             dent: 0,
             spaces_per_indent: spaces,
         }
@@ -343,7 +349,7 @@ where
 
     #[inline(always)]
     fn get_writer(&mut self) -> &mut W {
-        &mut self.writer
+        self.writer
     }
 
     #[inline(always)]
@@ -385,7 +391,7 @@ fn extend_from_slice(dst: &mut Vec<u8>, src: &[u8]) {
 
         ptr::copy_nonoverlapping(
             src.as_ptr(),
-            dst.as_mut_ptr().offset(dst_len as isize),
+            dst.as_mut_ptr().add(dst_len),
             src_len,
         );
     }

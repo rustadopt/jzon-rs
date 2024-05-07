@@ -8,13 +8,13 @@
 
 use std::{io, mem, ptr, slice};
 
-const DEC_DIGITS_LUT: &'static [u8] = b"0001020304050607080910111213141516171819\
+const DEC_DIGITS_LUT: &[u8] = b"0001020304050607080910111213141516171819\
       2021222324252627282930313233343536373839\
       4041424344454647484950515253545556575859\
       6061626364656667686970717273747576777879\
       8081828384858687888990919293949596979899";
 
-const ZEROFILL: &'static [u8] = &[b'0'; 20];
+const ZEROFILL: &[u8] = &[b'0'; 20];
 
 #[inline(always)]
 unsafe fn write_num(n: &mut u64, curr: &mut isize, buf_ptr: *mut u8, lut_ptr: *const u8) {

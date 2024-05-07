@@ -52,15 +52,15 @@ impl PartialEq for JsonValue {
         use self::JsonValue::*;
         match (self, other) {
             (&Null, &Null) => true,
-            (&Short(ref a), &Short(ref b)) => a == b,
-            (&String(ref a), &String(ref b)) => a == b,
+            (Short(a), Short(b)) => a == b,
+            (String(a), String(b)) => a == b,
             (&Short(ref a), &String(ref b)) | (&String(ref b), &Short(ref a)) => {
                 a.as_str() == b.as_str()
             }
-            (&Number(ref a), &Number(ref b)) => a == b,
-            (&Boolean(ref a), &Boolean(ref b)) => a == b,
-            (&Object(ref a), &Object(ref b)) => a == b,
-            (&Array(ref a), &Array(ref b)) => a == b,
+            (Number(a), Number(b)) => a == b,
+            (Boolean(a), Boolean(b)) => a == b,
+            (Object(a), Object(b)) => a == b,
+            (Array(a), Array(b)) => a == b,
             _ => false,
         }
     }

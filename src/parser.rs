@@ -194,7 +194,7 @@ macro_rules! expect_string {
             }
             if ch == b'"' {
                 unsafe {
-                    let ptr = $parser.byte_ptr.offset(start as isize);
+                    let ptr = $parser.byte_ptr.add(start);
                     let len = $parser.index - 1 - start;
                     result = str::from_utf8_unchecked(slice::from_raw_parts(ptr, len));
                 }
@@ -358,7 +358,7 @@ impl<'a> Parser<'a> {
     pub fn new(source: &'a str) -> Self {
         Parser {
             buffer: Vec::with_capacity(30),
-            source: source,
+            source,
             byte_ptr: source.as_ptr(),
             index: 0,
             length: source.len(),
@@ -381,7 +381,7 @@ impl<'a> Parser<'a> {
     fn read_byte(&mut self) -> u8 {
         debug_assert!(self.index < self.length, "Reading out of bounds");
 
-        unsafe { *self.byte_ptr.offset(self.index as isize) }
+        unsafe { *self.byte_ptr.add(self.index) }
     }
 
     // Manually increment the index. Calling `read_byte` and then `bump`
@@ -410,7 +410,7 @@ impl<'a> Parser<'a> {
         let colno = col.chars().count();
 
         Err(Error::UnexpectedCharacter {
-            ch: ch,
+            ch,
             line: lineno + 1,
             column: colno + 1,
         })
@@ -420,9 +420,9 @@ impl<'a> Parser<'a> {
     fn read_hexdec_digit(&mut self) -> Result<u16> {
         let ch = expect_byte!(self);
         Ok(match ch {
-            b'0'..=b'9' => (ch - b'0'),
-            b'a'..=b'f' => (ch + 10 - b'a'),
-            b'A'..=b'F' => (ch + 10 - b'A'),
+            b'0'..=b'9' => ch - b'0',
+            b'a'..=b'f' => ch + 10 - b'a',
+            b'A'..=b'F' => ch + 10 - b'A',
             _ => return self.unexpected_character(),
         } as u16)
     }
@@ -556,7 +556,7 @@ impl<'a> Parser<'a> {
                         .and_then(|num| num.checked_add((ch - b'0') as u64))
                     {
                         Some(result) => num = result,
-                        None => e = e.checked_add(1).ok_or_else(|| Error::ExceededDepthLimit)?,
+                        None => e = e.checked_add(1).ok_or(Error::ExceededDepthLimit)?,
                     }
                 }
                 b'.' => {

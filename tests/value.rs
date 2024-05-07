@@ -87,7 +87,7 @@ fn is_as_boolean() {
     let boolean = JsonValue::Boolean(true);
 
     assert!(boolean.is_boolean());
-    assert_eq!(boolean.as_bool().unwrap(), true);
+    assert!(boolean.as_bool().unwrap());
 }
 
 #[test]
@@ -402,7 +402,7 @@ fn index_by_string_ref() {
     };
 
     let key = "foo".to_string();
-    let ref key_ref = key;
+    let key_ref = &key;
 
     assert_eq!(data[key_ref], "bar");
 }
@@ -436,7 +436,7 @@ fn index_mut_by_string_ref() {
     };
 
     let key = "foo".to_string();
-    let ref key_ref = key;
+    let key_ref = &key;
 
     data[key_ref] = "bar".into();
 
@@ -471,7 +471,7 @@ fn object_index_by_string_ref() {
     };
 
     let key = "foo".to_string();
-    let ref key_ref = key;
+    let key_ref = &key;
 
     if let JsonValue::Object(data) = val {
         assert_eq!(data[key_ref], "bar");
@@ -511,7 +511,7 @@ fn object_index_mut_by_string_ref() {
     };
 
     let key = "foo".to_string();
-    let ref key_ref = key;
+    let key_ref = &key;
 
     if let JsonValue::Object(mut data) = val {
         data[key_ref] = "bar".into();

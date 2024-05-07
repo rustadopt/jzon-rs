@@ -71,9 +71,9 @@ impl Key {
     fn new(hash: u64, len: usize) -> Self {
         Key {
             buf: [0; KEY_BUF_LEN],
-            len: len,
+            len,
             ptr: ptr::null_mut(),
-            hash: hash,
+            hash,
         }
     }
 
@@ -150,7 +150,7 @@ impl Clone for Key {
             Key {
                 buf: [0; KEY_BUF_LEN],
                 len: self.len,
-                ptr: ptr,
+                ptr,
                 hash: self.hash,
             }
         } else {
@@ -216,7 +216,7 @@ impl Node {
     fn new(value: JsonValue, hash: u64, len: usize) -> Node {
         Node {
             key: Key::new(hash, len),
-            value: value,
+            value,
             left: 0,
             right: 0,
         }
@@ -229,6 +229,12 @@ impl Node {
 #[derive(Debug)]
 pub struct Object {
     store: Vec<Node>,
+}
+
+impl Default for Object {
+    fn default() -> Self {
+        Self::new()
+    }
 }
 
 impl Object {
@@ -250,7 +256,7 @@ impl Object {
 
     #[inline]
     fn node_at_index_mut(&mut self, index: usize) -> *mut Node {
-        unsafe { self.store.as_mut_ptr().offset(index as isize) }
+        unsafe { self.store.as_mut_ptr().add(index) }
     }
 
     #[inline(always)]
@@ -270,7 +276,7 @@ impl Object {
                 // copy than write. Difference in benchmarks wasn't big though.
                 ptr::copy_nonoverlapping(
                     &node as *const Node,
-                    self.store.as_mut_ptr().offset(index as isize),
+                    self.store.as_mut_ptr().add(index),
                     1,
                 );
 
@@ -308,7 +314,7 @@ impl Object {
         let key = key.as_bytes();
         let hash = hash_key(key);
 
-        if self.store.len() == 0 {
+        if self.store.is_empty() {
             self.store.push(Node::new(value, hash, key.len()));
             self.store[0].key.attach(key);
             return 0;
@@ -359,7 +365,7 @@ impl Object {
     }
 
     pub fn get(&self, key: &str) -> Option<&JsonValue> {
-        if self.store.len() == 0 {
+        if self.store.is_empty() {
             return None;
         }
 
@@ -386,7 +392,7 @@ impl Object {
     }
 
     pub fn get_mut(&mut self, key: &str) -> Option<&mut JsonValue> {
-        if self.store.len() == 0 {
+        if self.store.is_empty() {
             return None;
         }
 
@@ -424,7 +430,7 @@ impl Object {
     /// Attempts to remove the value behind `key`, if successful
     /// will return the `JsonValue` stored behind the `key`.
     pub fn remove(&mut self, key: &str) -> Option<JsonValue> {
-        if self.store.len() == 0 {
+        if self.store.is_empty() {
             return None;
         }
 
@@ -534,7 +540,7 @@ impl Clone for Object {
             node.key.fix_ptr();
         }
 
-        Object { store: store }
+        Object { store }
     }
 }
 
@@ -562,8 +568,8 @@ impl PartialEq for Object {
 
         for (key, value) in self.iter() {
             match other.get(key) {
-                Some(ref other_val) => {
-                    if *other_val != value {
+                Some(other_val) => {
+                    if other_val != value {
                         return false;
                     }
                 }

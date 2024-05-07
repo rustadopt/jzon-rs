@@ -245,7 +245,7 @@ fn parse_nested_object() {
 #[test]
 fn parse_and_index_from_object() {
     let data = parse("{ \"pi\": 3.14 }").unwrap();
-    let ref pi = data["pi"];
+    let pi = &data["pi"];
 
     assert_eq!(pi, 3.14);
 }
