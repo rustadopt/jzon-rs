@@ -378,6 +378,9 @@ where
 //
 // LLVM is not able to lower `Vec::extend_from_slice` into a memcpy, so this
 // helps eke out that last bit of performance.
+//
+// TODO can this function be rewritten more safely without performance loss
+#[allow(clippy::uninit_vec)]
 #[inline]
 fn extend_from_slice(dst: &mut Vec<u8>, src: &[u8]) {
     let dst_len = dst.len();
@@ -389,11 +392,7 @@ fn extend_from_slice(dst: &mut Vec<u8>, src: &[u8]) {
         // We would have failed if `reserve` overflowed
         dst.set_len(dst_len + src_len);
 
-        ptr::copy_nonoverlapping(
-            src.as_ptr(),
-            dst.as_mut_ptr().add(dst_len),
-            src_len,
-        );
+        ptr::copy_nonoverlapping(src.as_ptr(), dst.as_mut_ptr().add(dst_len), src_len);
     }
 }
 

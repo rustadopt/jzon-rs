@@ -13,14 +13,14 @@ pub struct Short {
 /// A `Short` is a small string, up to `MAX_LEN` bytes, that can be managed without
 /// the expensive heap allocation performed for the regular `String` type.
 impl Short {
-    /// Creates a `Short` from a `&str` slice. This method can cause buffer
-    /// overflow if the length of the slice is larger than `MAX_LEN`, which is why
-    /// it is marked as `unsafe`.
+    /// Creates a `Short` from a `&str` slice. Typically you should avoid creating your own
+    /// `Short`s, instead create a `JsonValue` (either using `"foo".into()` or
+    /// `JsonValue::from("foo")`) out of a slice. This will automatically decide on `String` or
+    /// `Short` for you.
     ///
-    ///
-    /// Typically you should avoid creating your own `Short`s, instead create a
-    /// `JsonValue` (either using `"foo".into()` or `JsonValue::from("foo")`) out
-    /// of a slice. This will automatically decide on `String` or `Short` for you.
+    /// # Safety
+    /// This method can cause buffer overflow if the length of the slice is larger than `MAX_LEN`,
+    /// which is why it is marked as `unsafe`.
     #[inline(always)]
     pub unsafe fn from_slice(slice: &str) -> Self {
         let mut short = Short {

@@ -133,7 +133,7 @@ impl PartialEq<str> for JsonValue {
     }
 }
 
-impl<'a> PartialEq<JsonValue> for str {
+impl PartialEq<JsonValue> for str {
     fn eq(&self, other: &JsonValue) -> bool {
         match *other {
             JsonValue::Short(ref value) => value == self,

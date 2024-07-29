@@ -1,7 +1,7 @@
 use std::convert::TryInto;
 use std::io::{self, Write};
 use std::ops::{Deref, Index, IndexMut};
-use std::{f32, fmt, i16, i32, i64, i8, isize, mem, u16, u32, u64, u8, usize};
+use std::{fmt, mem};
 
 use crate::codegen::{
     DumpGenerator, Generator, PrettyGenerator, PrettyWriterGenerator, WriterGenerator,
@@ -145,46 +145,27 @@ impl JsonValue {
     }
 
     pub fn is_string(&self) -> bool {
-        match *self {
-            JsonValue::Short(_) => true,
-            JsonValue::String(_) => true,
-            _ => false,
-        }
+        matches!(*self, JsonValue::Short(_) | JsonValue::String(_))
     }
 
     pub fn is_number(&self) -> bool {
-        match *self {
-            JsonValue::Number(_) => true,
-            _ => false,
-        }
+        matches!(*self, JsonValue::Number(_))
     }
 
     pub fn is_boolean(&self) -> bool {
-        match *self {
-            JsonValue::Boolean(_) => true,
-            _ => false,
-        }
+        matches!(*self, JsonValue::Boolean(_))
     }
 
     pub fn is_null(&self) -> bool {
-        match *self {
-            JsonValue::Null => true,
-            _ => false,
-        }
+        matches!(*self, JsonValue::Null)
     }
 
     pub fn is_object(&self) -> bool {
-        match *self {
-            JsonValue::Object(_) => true,
-            _ => false,
-        }
+        matches!(*self, JsonValue::Object(_))
     }
 
     pub fn is_array(&self) -> bool {
-        match *self {
-            JsonValue::Array(_) => true,
-            _ => false,
-        }
+        matches!(*self, JsonValue::Array(_))
     }
 
     /// Checks whether the value is empty. Returns true for:
@@ -408,10 +389,10 @@ impl JsonValue {
     /// `Null` in it's place.
     ///
     /// - If the contained string is already a heap allocated `String`, then
-    /// the ownership is moved without any heap allocation.
+    ///   the ownership is moved without any heap allocation.
     ///
     /// - If the contained string is a `Short`, this will perform a heap
-    /// allocation to convert the types for you.
+    ///   allocation to convert the types for you.
     ///
     /// ## Example
     ///

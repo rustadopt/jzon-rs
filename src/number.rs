@@ -1,5 +1,6 @@
 use crate::util::grisu2;
 use crate::util::print_dec;
+use std::cmp::Ordering;
 use std::convert::{Infallible, TryFrom};
 use std::num::{FpCategory, TryFromIntError};
 use std::{f32, f64, fmt, ops};
@@ -56,8 +57,9 @@ impl Number {
     /// assert_eq!(pi, 3.141592653589793);
     /// ```
     ///
+    /// # Safety
     /// While this method is marked unsafe, it doesn't actually perform any unsafe operations.
-    /// THe goal of the 'unsafe' is to deter from using this method in favor of its safe equivalent
+    /// The goal of the 'unsafe' is to deter from using this method in favor of its safe equivalent
     /// `from_parts`, at least in context when the associated performance cost is negligible.
     #[inline]
     pub unsafe fn from_parts_unchecked(positive: bool, mantissa: u64, exponent: i16) -> Self {
@@ -149,12 +151,10 @@ impl Number {
 
         let e_diff = point as i16 + self.exponent;
 
-        Some(if e_diff == 0 {
-            self.mantissa
-        } else if e_diff < 0 {
-            self.mantissa.wrapping_div(decimal_power(-e_diff as u16))
-        } else {
-            self.mantissa.wrapping_mul(decimal_power(e_diff as u16))
+        Some(match e_diff.cmp(&0) {
+            Ordering::Equal => self.mantissa,
+            Ordering::Less => self.mantissa.wrapping_div(decimal_power(-e_diff as u16)),
+            Ordering::Greater => self.mantissa.wrapping_mul(decimal_power(e_diff as u16)),
         })
     }
 
@@ -182,12 +182,10 @@ impl Number {
 
         let e_diff = point as i16 + self.exponent;
 
-        Some(if e_diff == 0 {
-            num
-        } else if e_diff < 0 {
-            num.wrapping_div(decimal_power(-e_diff as u16) as i64)
-        } else {
-            num.wrapping_mul(decimal_power(e_diff as u16) as i64)
+        Some(match e_diff.cmp(&0) {
+            Ordering::Equal => num,
+            Ordering::Less => num.wrapping_div(decimal_power(-e_diff as u16) as i64),
+            Ordering::Greater => num.wrapping_mul(decimal_power(e_diff as u16) as i64),
         })
     }
 }
@@ -205,16 +203,16 @@ impl PartialEq for Number {
 
         let e_diff = self.exponent - other.exponent;
 
-        if e_diff == 0 {
-            self.mantissa == other.mantissa
-        } else if e_diff > 0 {
-            let power = decimal_power(e_diff as u16);
-
-            self.mantissa.wrapping_mul(power) == other.mantissa
-        } else {
-            let power = decimal_power(-e_diff as u16);
-
-            self.mantissa == other.mantissa.wrapping_mul(power)
+        match e_diff.cmp(&0) {
+            Ordering::Equal => self.mantissa == other.mantissa,
+            Ordering::Less => {
+                let power = decimal_power(-e_diff as u16);
+                self.mantissa == other.mantissa.wrapping_mul(power)
+            }
+            Ordering::Greater => {
+                let power = decimal_power(e_diff as u16);
+                self.mantissa.wrapping_mul(power) == other.mantissa
+            }
         }
     }
 }
