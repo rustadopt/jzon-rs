@@ -1,14 +1,15 @@
-use std::{ ops, fmt, f32, f64 };
-use std::convert::{TryFrom, Infallible};
-use std::num::{FpCategory, TryFromIntError};
 use crate::util::grisu2;
 use crate::util::print_dec;
+use std::cmp::Ordering;
+use std::convert::{Infallible, TryFrom};
+use std::num::{FpCategory, TryFromIntError};
+use std::{f32, f64, fmt, ops};
 
 /// NaN value represented in `Number` type. NaN is equal to itself.
 pub const NAN: Number = Number {
     category: NAN_MASK,
     mantissa: 0,
-    exponent: 0
+    exponent: 0,
 };
 
 const NEGATIVE: u8 = 0;
@@ -56,15 +57,16 @@ impl Number {
     /// assert_eq!(pi, 3.141592653589793);
     /// ```
     ///
+    /// # Safety
     /// While this method is marked unsafe, it doesn't actually perform any unsafe operations.
-    /// THe goal of the 'unsafe' is to deter from using this method in favor of its safe equivalent
+    /// The goal of the 'unsafe' is to deter from using this method in favor of its safe equivalent
     /// `from_parts`, at least in context when the associated performance cost is negligible.
     #[inline]
     pub unsafe fn from_parts_unchecked(positive: bool, mantissa: u64, exponent: i16) -> Self {
         Number {
             category: positive as u8,
-            exponent: exponent,
-            mantissa: mantissa,
+            exponent,
+            mantissa,
         }
     }
 
@@ -149,12 +151,10 @@ impl Number {
 
         let e_diff = point as i16 + self.exponent;
 
-        Some(if e_diff == 0 {
-            self.mantissa
-        } else if e_diff < 0 {
-            self.mantissa.wrapping_div(decimal_power(-e_diff as u16))
-        } else {
-            self.mantissa.wrapping_mul(decimal_power(e_diff as u16))
+        Some(match e_diff.cmp(&0) {
+            Ordering::Equal => self.mantissa,
+            Ordering::Less => self.mantissa.wrapping_div(decimal_power(-e_diff as u16)),
+            Ordering::Greater => self.mantissa.wrapping_mul(decimal_power(e_diff as u16)),
         })
     }
 
@@ -182,12 +182,10 @@ impl Number {
 
         let e_diff = point as i16 + self.exponent;
 
-        Some(if e_diff == 0 {
-            num
-        } else if e_diff < 0 {
-            num.wrapping_div(decimal_power(-e_diff as u16) as i64)
-        } else {
-            num.wrapping_mul(decimal_power(e_diff as u16) as i64)
+        Some(match e_diff.cmp(&0) {
+            Ordering::Equal => num,
+            Ordering::Less => num.wrapping_div(decimal_power(-e_diff as u16) as i64),
+            Ordering::Greater => num.wrapping_mul(decimal_power(e_diff as u16) as i64),
         })
     }
 }
@@ -195,8 +193,7 @@ impl Number {
 impl PartialEq for Number {
     #[inline]
     fn eq(&self, other: &Number) -> bool {
-        if self.is_zero() && other.is_zero()
-        || self.is_nan()  && other.is_nan() {
+        if self.is_zero() && other.is_zero() || self.is_nan() && other.is_nan() {
             return true;
         }
 
@@ -206,18 +203,17 @@ impl PartialEq for Number {
 
         let e_diff = self.exponent - other.exponent;
 
-        if e_diff == 0 {
-            return self.mantissa == other.mantissa;
-        } else if e_diff > 0 {
-            let power = decimal_power(e_diff as u16);
-
-            self.mantissa.wrapping_mul(power) == other.mantissa
-        } else {
-            let power = decimal_power(-e_diff as u16);
-
-            self.mantissa == other.mantissa.wrapping_mul(power)
+        match e_diff.cmp(&0) {
+            Ordering::Equal => self.mantissa == other.mantissa,
+            Ordering::Less => {
+                let power = decimal_power(-e_diff as u16);
+                self.mantissa == other.mantissa.wrapping_mul(power)
+            }
+            Ordering::Greater => {
+                let power = decimal_power(e_diff as u16);
+                self.mantissa.wrapping_mul(power) == other.mantissa
+            }
         }
-
     }
 }
 
@@ -225,7 +221,7 @@ impl fmt::Display for Number {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         unsafe {
             if self.is_nan() {
-                return f.write_str("nan")
+                return f.write_str("nan");
             }
             let (positive, mantissa, exponent) = self.as_parts();
             let mut buf = Vec::new();
@@ -237,9 +233,8 @@ impl fmt::Display for Number {
 
 fn exponentiate_f64(n: f64, e: i16) -> f64 {
     static CACHE_POWERS: [f64; 23] = [
-          1.0,    1e1,    1e2,    1e3,    1e4,    1e5,    1e6,    1e7,
-          1e8,    1e9,   1e10,   1e11,   1e12,   1e13,   1e14,   1e15,
-         1e16,   1e17,   1e18,   1e19,   1e20,   1e21,   1e22
+        1.0, 1e1, 1e2, 1e3, 1e4, 1e5, 1e6, 1e7, 1e8, 1e9, 1e10, 1e11, 1e12, 1e13, 1e14, 1e15, 1e16,
+        1e17, 1e18, 1e19, 1e20, 1e21, 1e22,
     ];
 
     if e >= 0 {
@@ -261,12 +256,10 @@ fn exponentiate_f64(n: f64, e: i16) -> f64 {
     }
 }
 
-
 fn exponentiate_f32(n: f32, e: i16) -> f32 {
     static CACHE_POWERS: [f32; 23] = [
-          1.0,    1e1,    1e2,    1e3,    1e4,    1e5,    1e6,    1e7,
-          1e8,    1e9,   1e10,   1e11,   1e12,   1e13,   1e14,   1e15,
-         1e16,   1e17,   1e18,   1e19,   1e20,   1e21,   1e22
+        1.0, 1e1, 1e2, 1e3, 1e4, 1e5, 1e6, 1e7, 1e8, 1e9, 1e10, 1e11, 1e12, 1e13, 1e14, 1e15, 1e16,
+        1e17, 1e18, 1e19, 1e20, 1e21, 1e22,
     ];
 
     if e >= 0 {
@@ -290,7 +283,9 @@ fn exponentiate_f32(n: f32, e: i16) -> f32 {
 
 impl From<Number> for f64 {
     fn from(num: Number) -> f64 {
-        if num.is_nan() { return f64::NAN; }
+        if num.is_nan() {
+            return f64::NAN;
+        }
 
         let mut n = num.mantissa as f64;
         let mut e = num.exponent;
@@ -301,13 +296,19 @@ impl From<Number> for f64 {
         }
 
         let f = exponentiate_f64(n, e);
-        if num.is_sign_positive() { f } else { -f }
+        if num.is_sign_positive() {
+            f
+        } else {
+            -f
+        }
     }
 }
 
 impl From<Number> for f32 {
     fn from(num: Number) -> f32 {
-        if num.is_nan() { return f32::NAN; }
+        if num.is_nan() {
+            return f32::NAN;
+        }
 
         let mut n = num.mantissa as f32;
         let mut e = num.exponent;
@@ -318,7 +319,11 @@ impl From<Number> for f32 {
         }
 
         let f = exponentiate_f32(n, e);
-        if num.is_sign_positive() { f } else { -f }
+        if num.is_sign_positive() {
+            f
+        } else {
+            -f
+        }
     }
 }
 
@@ -489,7 +494,7 @@ macro_rules! impl_integer {
                 Number::from(*self) == *other
             }
         }
-    }
+    };
 }
 
 impl_signed!(isize, i8, i16, i32, i64);

@@ -16,7 +16,6 @@ extern crate test;
 
 #[macro_use]
 // mod macros;
-
 use test::Bencher;
 
 // #[derive(Debug, PartialEq, RustcEncodable, RustcDecodable, Serialize, Deserialize)]

@@ -68,22 +68,30 @@ fn eq_normalize_right_negative() {
 
 #[test]
 fn from_small_float() {
-    assert_eq!(Number::from(0.05), unsafe { Number::from_parts_unchecked(true, 5, -2) });
+    assert_eq!(Number::from(0.05), unsafe {
+        Number::from_parts_unchecked(true, 5, -2)
+    });
 }
 
 #[test]
 fn from_very_small_float() {
-    assert_eq!(Number::from(5e-50), unsafe { Number::from_parts_unchecked(true, 5, -50) });
+    assert_eq!(Number::from(5e-50), unsafe {
+        Number::from_parts_unchecked(true, 5, -50)
+    });
 }
 
 #[test]
 fn from_big_float() {
-    assert_eq!(Number::from(500), unsafe { Number::from_parts_unchecked(true, 500, 0) });
+    assert_eq!(Number::from(500), unsafe {
+        Number::from_parts_unchecked(true, 500, 0)
+    });
 }
 
 #[test]
 fn from_very_big_float() {
-    assert_eq!(Number::from(5e50), unsafe { Number::from_parts_unchecked(true, 5, 50) });
+    assert_eq!(Number::from(5e50), unsafe {
+        Number::from_parts_unchecked(true, 5, 50)
+    });
 }
 
 #[test]
@@ -123,5 +131,8 @@ fn as_fixed_point_i64() {
 
 #[test]
 fn convert_f64_precision() {
-    assert_eq!(unsafe { Number::from_parts_unchecked(true, 4750000000000001, -18) }, 0.004750000000000001);
+    assert_eq!(
+        unsafe { Number::from_parts_unchecked(true, 4750000000000001, -18) },
+        0.004750000000000001
+    );
 }
