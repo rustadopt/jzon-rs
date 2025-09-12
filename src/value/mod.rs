@@ -490,7 +490,7 @@ impl JsonValue {
     /// }
     /// assert_eq!(animals_with_letter_a, vec!["Cat", "Snail"]);
     /// ```
-    pub fn members(&self) -> Members {
+    pub fn members(&self) -> Members<'_> {
         match *self {
             JsonValue::Array(ref vec) => vec.iter(),
             _ => [].iter(),
@@ -499,7 +499,7 @@ impl JsonValue {
 
     /// Works on `JsonValue::Array` - returns a mutable iterator over members.
     /// Will return an empty iterator if called on non-array types.
-    pub fn members_mut(&mut self) -> MembersMut {
+    pub fn members_mut(&mut self) -> MembersMut<'_> {
         match *self {
             JsonValue::Array(ref mut vec) => vec.iter_mut(),
             _ => [].iter_mut(),
@@ -529,7 +529,7 @@ impl JsonValue {
     /// assert_eq!(total_height, 5.12);
     /// assert_eq!(names_with_o, vec!["Bob", "Carlos"]);
     /// ```
-    pub fn entries(&self) -> Entries {
+    pub fn entries(&self) -> Entries<'_> {
         match *self {
             JsonValue::Object(ref object) => object.iter(),
             _ => Entries::empty(),
@@ -539,7 +539,7 @@ impl JsonValue {
     /// Works on `JsonValue::Object` - returns a mutable iterator over
     /// key value pairs.
     /// Will return an empty iterator if called on non-object types.
-    pub fn entries_mut(&mut self) -> EntriesMut {
+    pub fn entries_mut(&mut self) -> EntriesMut<'_> {
         match *self {
             JsonValue::Object(ref mut object) => object.iter_mut(),
             _ => EntriesMut::empty(),
@@ -694,7 +694,7 @@ impl IndexMut<usize> for JsonValue {
 /// assert!(object["foo"] == "bar");
 /// # }
 /// ```
-impl<'a> Index<&'a str> for JsonValue {
+impl Index<&str> for JsonValue {
     type Output = JsonValue;
 
     fn index(&self, index: &str) -> &JsonValue {
@@ -713,7 +713,7 @@ impl Index<String> for JsonValue {
     }
 }
 
-impl<'a> Index<&'a String> for JsonValue {
+impl Index<&String> for JsonValue {
     type Output = JsonValue;
 
     fn index(&self, index: &String) -> &JsonValue {
@@ -737,7 +737,7 @@ impl<'a> Index<&'a String> for JsonValue {
 /// assert!(object["foo"] == 42);
 /// # }
 /// ```
-impl<'a> IndexMut<&'a str> for JsonValue {
+impl IndexMut<&str> for JsonValue {
     fn index_mut(&mut self, index: &str) -> &mut JsonValue {
         match *self {
             JsonValue::Object(ref mut object) => &mut object[index],
@@ -755,7 +755,7 @@ impl IndexMut<String> for JsonValue {
     }
 }
 
-impl<'a> IndexMut<&'a String> for JsonValue {
+impl IndexMut<&String> for JsonValue {
     fn index_mut(&mut self, index: &String) -> &mut JsonValue {
         self.index_mut(index.deref())
     }

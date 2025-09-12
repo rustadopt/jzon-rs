@@ -103,7 +103,7 @@ impl<K: AsRef<str>, V: Into<JsonValue>> From<BTreeMap<K, V>> for JsonValue {
     }
 }
 
-impl<'a> PartialEq<&'a str> for JsonValue {
+impl PartialEq<&str> for JsonValue {
     fn eq(&self, other: &&str) -> bool {
         match *self {
             JsonValue::Short(ref value) => value == *other,
@@ -113,7 +113,7 @@ impl<'a> PartialEq<&'a str> for JsonValue {
     }
 }
 
-impl<'a> PartialEq<JsonValue> for &'a str {
+impl PartialEq<JsonValue> for &str {
     fn eq(&self, other: &JsonValue) -> bool {
         match *other {
             JsonValue::Short(ref value) => value == *self,

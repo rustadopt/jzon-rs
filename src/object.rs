@@ -501,14 +501,14 @@ impl Object {
     }
 
     #[inline(always)]
-    pub fn iter(&self) -> Iter {
+    pub fn iter(&self) -> Iter<'_> {
         Iter {
             inner: self.store.iter(),
         }
     }
 
     #[inline(always)]
-    pub fn iter_mut(&mut self) -> IterMut {
+    pub fn iter_mut(&mut self) -> IterMut<'_> {
         IterMut {
             inner: self.store.iter_mut(),
         }
@@ -718,7 +718,7 @@ impl IntoIterator for Object {
 /// # }
 /// ```
 // TODO: doc
-impl<'a> Index<&'a str> for Object {
+impl Index<&str> for Object {
     type Output = JsonValue;
 
     fn index(&self, index: &str) -> &JsonValue {
@@ -737,7 +737,7 @@ impl Index<String> for Object {
     }
 }
 
-impl<'a> Index<&'a String> for Object {
+impl Index<&String> for Object {
     type Output = JsonValue;
 
     fn index(&self, index: &String) -> &JsonValue {
@@ -764,7 +764,7 @@ impl<'a> Index<&'a String> for Object {
 /// }
 /// # }
 /// ```
-impl<'a> IndexMut<&'a str> for Object {
+impl IndexMut<&str> for Object {
     fn index_mut(&mut self, index: &str) -> &mut JsonValue {
         if self.get(index).is_none() {
             self.insert(index, JsonValue::Null);
@@ -779,7 +779,7 @@ impl IndexMut<String> for Object {
     }
 }
 
-impl<'a> IndexMut<&'a String> for Object {
+impl IndexMut<&String> for Object {
     fn index_mut(&mut self, index: &String) -> &mut JsonValue {
         self.index_mut(index.deref())
     }
